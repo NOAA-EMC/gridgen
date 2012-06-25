@@ -69,6 +69,11 @@ function [lon_sub,lat_sub,depth_sub] = generate_grid(ref_dir,bathy_source,coord,
 %|       features are defined in the base bathymetries before using them.              |
 %|    c. While the code allows for wrapping around in the base grid it assumes that    |
 %|       the target grid will be monotonically increasing.                             |
+%|                                                                                     |
+%|   BUG FIXES                                                                         |
+%|      06/25/2012 : Fixed erroneous generation of NaNs in grids that wrap around the  |
+%|                   globe                                                             |
+%|                                                                                     |
 % -------------------------------------------------------------------------------------
 
 %@@@ Initialize the corners of the grid domain
@@ -382,7 +387,7 @@ else
                 if (~isempty(loc1) || ~isempty(loc2))
                     Ntt = length(loc1) + length(loc2);
                     if (Ntt/Nt > limit)
-                        depth_sub(j,i) = 0.5*(mean(depth_tmp1(loc1)) + mean(depth_tmp2(loc2)));
+                        depth_sub(j,i) = mean([depth_tmp1(loc1) ; depth_tmp2(loc2)]);
                     else
                         depth_sub(j,i) = dry;
                     end;
