@@ -1,69 +1,65 @@
-function [bound_ingrid,Nb] = compute_boundary(coord,bound,icoords)
+function [bound_ingrid,Nb] = compute_boundary(coord,bound)
 
-% -------------------------------------------------------------------------------------
-%|                                                                                     |
-%|                          +----------------------------+                             |
-%|                          | GRIDGEN          NOAA/NCEP |                             |
-%|                          |      Arun Chawla           |                             |
-%|                          |  Andre van der Westhuysen  |                             |
-%|                          |                            |                             |
-%|                          | Last Update :  20-Aug-2010 |                             |
-%|                          +----------------------------+                             |
-%|                                    Arun.Chawla@noaa.gov                             |
-%|                         Andre.VanderWesthuysen@noaa.gov                             |
-%|                          Distributed with WAVEWATCH III                             |
-%|                                                                                     |
-%|                     Copyright 2009 National Weather Service (NWS),                  |
-%|       National Oceanic and Atmospheric Administration.  All rights reserved.        |
-%|                                                                                     |
-%| DESCRIPTION                                                                         |
-%| Computes the shoreline polygons from the GSHHS database that lie within the         |
-%| grid domain, properly accounting for polygons that cross the domain. The routine    |
-%| has been designed to work with coastal polygons only but that can be changed by     | 
-%| changing the flag bound(i).flag in the code. See GSHHS documentation for the        |
-%| meaning of the different flags                                                      |
-%|                                                                                     |
-%| [bound_ingrid,Nb] = compute_boundary(coord,bound)                                   |
-%|                                                                                     |
-%| INPUT                                                                               |
-%|   coord : An array defining the corner points of the grid                           |
-%|           coord(1) = Lattitude (y) of lower left hand corner                        |
-%|           coord(2) = Longitude (x) of lower left hand corner                        |
-%|           coord(3) = Lattitude (y) of upper right hand corner                       |
-%|           coord(4) = Longitude (x) of upper right hand corner                       |
-%|   bound : A data structure array of the basic polygons (The GSHHS polygons are      |
-%|           stored as mat files with several different resolutions and the user       | 
-%|           should ensure that the files have been loaded before using this routine). |
-%|                                                                                     |
-%|           The different available files are --                                      |
-%|              coastal_bound_ful.mat    -- Full resolution         (188606 polygons)  |
-%|		coastal_bound_high.mat   -- High resolution (0.2 km; 153539 polygons)  |
-%|		coastal_bound_inter.mat  -- Intermediate resolution                    |
-%|                                                             (1 km; 41523 polygons)  |
-%|		coastal_bound_low.mat    -- Low resolution     (5 km; 10769 polygons)  |
-%|		coastal_bound_coarse.mat -- Coarse resolution  (25 km; 1866 polygons)  |
-%|                                                                                     |
-%|	    Loading any of these files would create a data structure array of the      |
-%|          GSHHS polygons called "bound" and the user can use any of the above        |
-%|	    Alternatively, a separate list of user defined polygons can also be        |
-%|          generated having the same fields as bound. One such list is                |
-%|	    "optional_coastal_polygons.mat" which is also distributed with the         |
-%|          reference data. This is an ever growing list of water bodies that see      |
-%|          very little wave action and for most practical purposes can be masked out  |
-%|          as land.                                                                   |
-%|                                                                                     | 
-%|          See also optional_bound.m which shows how the optional coastal polygons    |
-%|          are used                                                                   |
-%|   icoords : Coordinate system representation for longitude data                     |
-%|               Options are --                                                        |
-%|                  0 --> Longitudes range from -180 to 180                            |
-%|                  1 --> Longitudes range from 0 to 360                               |
-%|                                                                                     | 
-%| OUTPUT                                                                              |
-%|  bound_ingrid : Subset data structure array of polygons that lie inside the grid    |
-%|  Nb           : Total number of polygons found that lie inside the grid             |
-%|                                                                                     |
-% -------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+%|                                                                        |
+%|                    +----------------------------+                      |
+%|                    | GRIDGEN          NOAA/NCEP |                      |
+%|                    |                            |                      |
+%|                    | Last Update :  23-Oct-2012 |                      |
+%|                    +----------------------------+                      |
+%|                     Distributed with WAVEWATCH III                     |
+%|                                                                        |
+%|                 Copyright 2009 National Weather Service (NWS),         |
+%|  National Oceanic and Atmospheric Administration.  All rights reserved.|
+%|                                                                        |
+%| DESCRIPTION                                                            |
+%| Computes the shoreline polygons from the GSHHS database that lie within| 
+%| the grid domain, properly accounting for polygons that cross the domain| 
+%| The routine has been designed to work with coastal polygons only but   |
+%| that can be changed by changing the flag bound(i).flag in the code. See|
+%| GSHHS documentation for the meaning of the different flags             |
+%|                                                                        |
+%| [bound_ingrid,Nb] = compute_boundary(coord,bound)                      |
+%|                                                                        |
+%| INPUT                                                                  |
+%|   coord : An array defining the corner points of the grid              |
+%|           coord(1) = Lattitude (y) of lower left hand corner           |
+%|           coord(2) = Longitude (x) of lower left hand corner           |
+%|           coord(3) = Lattitude (y) of upper right hand corner          |
+%|           coord(4) = Longitude (x) of upper right hand corner          |
+%|   bound : A data structure array of the basic polygons (The GSHHS      |
+%|           polygons are stored as mat files with several different      | 
+%|           resolutions and the user should ensure that the files have   |
+%|           been loaded before using this routine).                      |
+%|                                                                        |
+%|           The different available files are --                         |
+%|             coastal_bound_ful.mat    -- Full resolution                |
+%|                                         (188606 polygons)              |
+%|		       coastal_bound_high.mat   -- High resolution        |
+%|                                         (0.2 km; 153539 polygons)      |
+%|		       coastal_bound_inter.mat  -- Intermediate resolution|
+%|                                         (1 km; 41523 polygons)         |
+%|		       coastal_bound_low.mat    -- Low resolution         |
+%|                                         (5 km; 10769 polygons)         |
+%|		       coastal_bound_coarse.mat -- Coarse resolution      |
+%|                                         (25 km; 1866 polygons)         |
+%|                                                                        |
+%|	    Alternatively, a separate list of user defined polygons can   |
+%|          be generated having the same fields as bound. One such list is|
+%|	    "optional_coastal_polygons.mat" which is also distributed with|
+%|          reference data. This is an ever growing list of water bodies  |
+%|          that see very little wave action and for most practical       | 
+%|          purposes can be masked out as land.                           |
+%|                                                                        | 
+%|          See also optional_bound.m which shows how the optional coastal|
+%|          polygons are used                                             |
+%|                                                                        | 
+%| OUTPUT                                                                 |
+%|  bound_ingrid : Subset data structure array of polygons that lie inside|
+%|                 the grid                                               |
+%|  Nb           : Total number of polygons found that lie inside the grid|
+%|                                                                        |
+% -------------------------------------------------------------------------
 
 lat_start = coord(1);
 lon_start = coord(2);
@@ -72,11 +68,19 @@ lon_end = coord(4);
 
 %@@@ Definitions
 
-%@@@ Minimum distance between points (to avoid round off errors from points too close to each other)
+%@@@ Minimum distance between points (to avoid round off errors from points
+%@@@ too close to each other)
 
 eps = 1e-5;
 
-%@@@ Polygon defining the bounding grid. Bounding grid is defined in the counter clockwise direction
+%@@@ Maximum distance between points. This is being defined so that we do
+%@@@ not have large gaps between subsequent points of the final boundary
+%@@@ polygon
+
+MAX_SEG_LENGTH = 0.25;
+
+%@@@ Polygon defining the bounding grid. Bounding grid is defined in the 
+%@@@ counter clockwise direction
 
 px = [lon_start lon_end lon_end lon_start lon_start];
 py = [lat_start lat_start lat_end lat_end lat_start];
@@ -105,32 +109,15 @@ N = length(bound);
 in_coord = 1;
 itmp = 0;
 
-%@@@ Convert base data to specified longitude range
 
-      if (icoords == 0)
-          for i = 1:N
-              loc = find(bound(i).x > 180);
-              bound(i).x(loc) = bound(i).x(loc) - 360;
-              bound(i).west = min(bound(i).x);
-              bound(i).east = max(bound(i).x);
-              clear loc;
-          end;
-      elseif (icoords == 1)
-          for i = 1:N
-              loc = find(bound(i).x < 0);
-              bound(i).x(loc) = bound(i).x(loc) + 360;
-              bound(i).west = min(bound(i).x);
-              bound(i).east = max(bound(i).x);
-              clear loc;
-          end;
-      end;
 
 %@@@ Loop through all the boundaries in the database
 
 for i = 1:N
     
-    %@@@ Limit boundaries to coastal type only. This flag needs to be changed if 
-    %@@@ interested in other boundaries. See GSHHS documentation for boundary type flags
+    %@@@ Limit boundaries to coastal type only. This flag needs to be 
+    %@@@ changed if interested in other boundaries. See GSHHS documentation 
+    %@@@ for boundary type flags
    
     if (bound(i).level == 1)
                                                      
@@ -142,11 +129,11 @@ for i = 1:N
         else
             in_grid = 1;
         end;
-        
+
         %@@@ Determine if boundary lies completely inside the domain
 
-        if (bound(i).west >= lon_start & bound(i).east <= lon_end & ...
-               bound(i).south >= lat_start & bound(i).north <= lat_end)
+        if (bound(i).west >= lon_start && bound(i).east <= lon_end && ...
+               bound(i).south >= lat_start && bound(i).north <= lat_end)
             inside_grid = 1;
         else
             inside_grid = 0;
@@ -160,14 +147,16 @@ for i = 1:N
  
             if (~inside_grid)
 
-                %@@@ Determine the points of the boundary that are inside/on/outside the bounding box
+                %@@@ Determine the points of the boundary that are 
+                %@@@ inside/on/outside the bounding box
  
                 [in_points,on_points] = inpolygon(bound(i).x,bound(i).y,px,py);
                 
                 loc1 = find(in_points == 1);
                 loc2 = find(on_points == 1);
 
-                %@@@ Ignore points that lie on the domain but neighboring points do not
+                %@@@ Ignore points that lie on the domain but neighboring 
+                %@@@ points do not
                 
                 for j = 1:length(loc2)
                     if (loc2(j) == 1)
@@ -180,9 +169,32 @@ for i = 1:N
                         p1 = loc2(j)-1;
                         p2 = loc2(j)+1;
                     end;
-                    if (in_points(p1) == 0 & in_points(p2) == 0)
+                    if (in_points(p1) == 0 && in_points(p2) == 0)
                         in_points(loc2(j)) = 0;
                     end;
+                end;                
+
+                %@@@ Points of domain in the boundary
+                
+                domain_inb = inpolygon(px,py,bound(i).x,bound(i).y);
+                loc_t = find(domain_inb == 1);
+                domain_inb_lth = length(loc_t);
+
+                if (isempty(loc1))
+                    if (domain_inb_lth == length(px))
+                        bound_ingrid(in_coord).x = px;
+                        bound_ingrid(in_coord).y = py; 
+                        bound_ingrid(in_coord).n = length(px);
+                        bound_ingrid(in_coord).west = lon_start;
+                        bound_ingrid(in_coord).east = lon_end;
+                        bound_ingrid(in_coord).north = lat_end;
+                        bound_ingrid(in_coord).south = lat_start;
+                        bound_ingrid(in_coord).height = lon_end - lon_start;
+                        bound_ingrid(in_coord).width = lat_end - lat_start;
+                        bound_ingrid(in_coord).level = 1;
+                        in_coord = in_coord + 1;
+                    end;
+                    clear loc_t domain_inb;
                 end;
                 
                 %@@@ Loop through only if there are points inside the domain
@@ -191,8 +203,8 @@ for i = 1:N
                 
                     n = bound(i).n;
 
-                    %@@@ Flag the points where the boundary moves from in to out of the domain
-                    %@@@ as well as out to in
+                    %@@@ Flag the points where the boundary moves from in 
+                    %@@@ to out of the domain as well as out to in
 
                     in2out_count = 1;
                     out2in_count = 1;
@@ -201,11 +213,11 @@ for i = 1:N
                     in2out = [];
 
                     for j = 1:bound(i).n-1
-                        if (in_points(j) > 0 & in_points(j+1) == 0)
+                        if (in_points(j) > 0 && in_points(j+1) == 0)
                             in2out(in2out_count) = j;
                             in2out_count = in2out_count+1;
                         end;
-                        if (in_points(j) == 0 & in_points(j+1) > 0)
+                        if (in_points(j) == 0 && in_points(j+1) > 0)
                             out2in(out2in_count) = j;
                             out2in_count = out2in_count+1;
                         end;
@@ -218,7 +230,8 @@ for i = 1:N
                         return;
                     end;                
                
-                    %@@@ Crossing points are oriented to make sure we start from out to in
+                    %@@@ Crossing points are oriented to make sure we start 
+                    %@@@ from out to in
 
                     if (in_points(1) > 0)
                         in2out_tmp = in2out;
@@ -231,15 +244,9 @@ for i = 1:N
                     clear in2out_tmp;
                                   
                     %@@@ For each in2out and out2in find a grid intersecting point
-
-                    in2out_gridbox = [];
-                    out2in_gridbox = [];
-                    in2out_gridboxdist = [];
-                    out2in_gridboxdist = [];
-                    in2out_xcross = [];
-                    out2in_xcross = [];
-                    in2out_ycross = [];
-                    out2in_ycross = [];
+                                    
+                    clear in2out_gridbox in2out_gridboxdist in2out_xcross in2out_ycross;
+                    clear out2in_gridbox out2in_gridboxdist out2in_xcross out2in_ycross;
                     
                     in2out_gridbox = zeros(in2out_count,1);
                     out2in_gridbox = zeros(out2in_count,1);
@@ -257,13 +264,14 @@ for i = 1:N
 
                                 if (isinf(m_grid(k)))
                                     g = abs(x1-px(k));
-				else
+                                else
                                     g = abs(m_grid(k)*x1+c_grid(k)-y1);
                                 end;
 
                                 if (g <= eps)
                                    in2out_gridbox(j) = k;
-                                   in2out_gridboxdist(j) = k-1 + sqrt((px(k)-x1)^2+(py(k)-y1)^2)/box_length(k);
+                                   in2out_gridboxdist(j) = k-1 + ...
+                                       sqrt((px(k)-x1)^2+(py(k)-y1)^2)/box_length(k);
                                    break;
                                 end;
 
@@ -272,7 +280,7 @@ for i = 1:N
                             in2out_xcross(j) = NaN;
                             in2out_ycross(j) = NaN;
 
-			else
+                        else
 
                             x1 = bound(i).x(in2out(j));
                             x2 = bound(i).x(in2out(j)+1);
@@ -319,11 +327,12 @@ for i = 1:N
                         
                             in2out_xcross(j) = x;
                             in2out_ycross(j) = y;
-                            in2out_gridboxdist(j) = k-1 + sqrt((px(k)-x)^2+(py(k)-y)^2)/box_length(k);
+                            in2out_gridboxdist(j) = k-1 + ...
+                                sqrt((px(k)-x)^2+(py(k)-y)^2)/box_length(k);
 
                         end; %@@@ corresponds to if(on_points(in2out(j)) == 1)
                         
-                        if(on_points(out2in(j)+1) == 1)
+                        if (on_points(out2in(j)+1) == 1)
 
                             x1 = bound(i).x(out2in(j)+1);
                             y1 = bound(i).y(out2in(j)+1);
@@ -336,7 +345,8 @@ for i = 1:N
                                 end;
                                 if (g <= eps)
                                    out2in_gridbox(j) = k;
-                                   out2in_gridboxdist(j) = k-1 + sqrt((px(k)-x1)^2+(py(k)-y1)^2)/box_length(k);
+                                   out2in_gridboxdist(j) = k-1 + ...
+                                       sqrt((px(k)-x1)^2+(py(k)-y1)^2)/box_length(k);
                                    break;
                                 end;
                             end;
@@ -344,7 +354,7 @@ for i = 1:N
                             out2in_xcross(j) = NaN;
                             out2in_ycross(j) = NaN;
 
-			else
+                        else
 
                             x1 = bound(i).x(out2in(j));
                             x2 = bound(i).x(out2in(j)+1);
@@ -389,7 +399,8 @@ for i = 1:N
                             end;
                             out2in_xcross(j) = x;
                             out2in_ycross(j) = y;
-                            out2in_gridboxdist(j) = k-1 + sqrt((px(k)-x)^2+(py(k)-y)^2)/box_length(k);
+                            out2in_gridboxdist(j) = k-1 + ...
+                                sqrt((px(k)-x)^2+(py(k)-y)^2)/box_length(k);
 
                         end; %@@@ corresponds to if(on_points(out2in(j)) == 1)
 
@@ -400,91 +411,124 @@ for i = 1:N
                     if (in2out_count > 0)
 
                         subseg_acc = zeros(in2out_count,1);
-
-                        %@@@ Keep looping till all intersection points accounted for
-
-                        while(~isempty(find(subseg_acc == 0)))
-
-                            j=1;
-                            while(subseg_acc(j) == 1)
-                                j=j+1;
-                                if (j > in2out_count)
-                                    j=1;
-                                end;
-                                if (isempty(find(subseg_acc == 0)))
-                                    break;
+                        crnr_acc = 1 - domain_inb;
+     
+                        while(~isempty(find(subseg_acc == 0,1)))
+                            
+                            %@@@ Starting from the closest unaccounted
+                            %@@@ segment
+                            
+                            min_pos = 0;
+                            min_val = 4;
+                            for j = 1:in2out_count
+                                if (subseg_acc(j) == 0)
+                                    if (out2in_gridboxdist(j) <= min_val)
+                                        min_val = out2in_gridboxdist(j);
+                                        min_pos = j;
+                                    end;
                                 end;
                             end;
                             
-                            %@@@ Starting a new boundary from the first unaccounted for intersection
-                            %@@@ point. Boundary polygon is constructed by starting from the first time
-                            %@@@ the original polygon intersects the domain coming in and including all
-                            %@@@ the internal points and the intersection point from where it goes out again.
-
-                            if (subseg_acc(j) == 0)
-                        
-                                bound_ingrid(in_coord).x = [];
-                                bound_ingrid(in_coord).y = [];
-                                bound_ingrid(in_coord).n = 0;
-                                bound_ingrid(in_coord).east = 0;
-                                bound_ingrid(in_coord).west = 0;
-                                bound_ingrid(in_coord).north = 0;
-                                bound_ingrid(in_coord).south = 0;
-                                bound_ingrid(in_coord).height = 0;
-                                bound_ingrid(in_coord).width = 0;
-
-                                if (~isnan(out2in_xcross(j)))
-                                    bound_ingrid(in_coord).x = out2in_xcross(j);
-                                    bound_ingrid(in_coord).y = out2in_ycross(j);
-                                end;
-
-                                if ((out2in(j)+1) <= in2out(j))
-                                    bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;...
-                                                          bound(i).x((out2in(j)+1):in2out(j))];
-                                    bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;...
-                                                          bound(i).y((out2in(j)+1):in2out(j))];                       
-                                else                               
-                                    bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;...
-                                                          bound(i).x((out2in(j)+1):n);...
-                                                          bound(i).x(2:in2out(j))];
-                                    bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;...
-                                                          bound(i).y((out2in(j)+1):n);...
-                                                          bound(i).y(2:in2out(j))];                              
-                                end;
-
-                                if (~isnan(in2out_xcross(j)))
-                                    bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;in2out_xcross(j)];
-                                    bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;in2out_ycross(j)];
-                                end;
-
-                                new_bound=0; %@@@ Flag initializing a new boundary
-
-                                subseg_acc(j) = 1;
-                                seg_start = j;
-                                seg_index = j;
+                            j = min_pos;   
                             
-                                %@@@ Loop through intersection points till boundary is closed
+                            bound_ingrid(in_coord).x = [];
+                            bound_ingrid(in_coord).y = [];
+                            bound_ingrid(in_coord).n = 0;
+                            bound_ingrid(in_coord).east = 0;
+                            bound_ingrid(in_coord).west = 0;
+                            bound_ingrid(in_coord).north = 0;
+                            bound_ingrid(in_coord).south = 0;
+                            bound_ingrid(in_coord).height = 0;
+                            bound_ingrid(in_coord).width = 0;
+                            
+                            bound_x = [];
+                            bound_y = [];
 
-                                while (new_bound == 0)
- 
-                                    %@@@ Find the next closest point where the original polygon crosses the
-                                    %@@@ domain in again
- 
-                                    kstart = in2out_gridbox(seg_index);
-                                    start_dist = in2out_gridboxdist(seg_index);
+                            if (~isnan(out2in_xcross(j)))
+                                bound_x = out2in_xcross(j);
+                                bound_y = out2in_ycross(j);
+                            end;
+
+                            if ((out2in(j)+1) <= in2out(j))
+                                bound_x = [bound_x;bound(i).x((out2in(j)+1):in2out(j))];
+                                bound_y = [bound_y;bound(i).y((out2in(j)+1):in2out(j))];                       
+                            else                               
+                                bound_x = [bound_x;bound(i).x((out2in(j)+1):n);...
+                                                  bound(i).x(2:in2out(j))];
+                                bound_y = [bound_y;bound(i).y((out2in(j)+1):n);...
+                                                  bound(i).y(2:in2out(j))];                              
+                            end;
+
+                            if (~isnan(in2out_xcross(j)))
+                                bound_x = [bound_x;in2out_xcross(j)];
+                                bound_y = [bound_y;in2out_ycross(j)];
+                            end;
+
+                            close_bound=0; %@@@ Flag initializing close boundary
+                                
+                            starting_edge = out2in_gridbox(j);
+                            ending_edge = in2out_gridbox(j);
+                                
+                            subseg_acc(j) = 1;
+                            
+                            %@@@ Find the next closest segment going
+                            %@@@ anti-clockwise
+                            
+                            seg_index = j;                           
+                            
+                            
+                            while (close_bound == 0)
+                                
+                                %@@@ Check if last segment and see if can
+                                %@@@ proceed counter clockwise 
+                            
+                                if (isempty(find(subseg_acc == 0,1)))
+                                    for k = in2out_gridbox(seg_index):4
+                                        if (domain_inb(k+1) == 1 && crnr_acc(k+1) == 0)
+                                            bound_x = [bound_x;px(k+1)];
+                                            bound_y = [bound_y;py(k+1)];
+                                            crnr_acc(k+1) = 1;
+                                            ending_edge = k;
+                                        else
+                                            close_bound = 1;
+                                            break;
+                                        end;
+                                    end;
+                                
+                                    if (close_bound == 0)
+                                        for k = 1:(in2out_gridbox(seg_index)-1)
+                                            if (domain_inb(k+1) == 1 && crnr_acc(k+1) == 0)
+                                                bound_x = [bound_x;px(k+1)];
+                                                bound_y = [bound_y;py(k+1)];
+                                                crnr_acc(k+1) = 1;
+                                                ending_edge = k;
+                                            else
+                                                close_bound = 1;
+                                                break;
+                                            end;
+                                        end;
+                                        close_bound = 1;
+                                    end;
+                                
+                                else
+                                                                                                    
+                                    curr_seg = seg_index;                           
+                                    kstart = in2out_gridbox(curr_seg);
+                                    start_dist = in2out_gridboxdist(curr_seg);
                                     min_pos = 0;
                                     min_val = 4.0;
+                                
+                                    %@@@ Check all segments
 
-                                    for k1 = 1:out2in_count                                        
+                                    for k1 = 1:in2out_count                                        
                                         if ((out2in_gridboxdist(k1)-start_dist) > eps ... 
                                             && (out2in_gridboxdist(k1)-start_dist) < min_val)
                                             min_pos = k1;
                                             min_val = out2in_gridboxdist(k1)-start_dist;
                                         end;                                        
                                     end;
-
-                                    if (min_pos == 0)              %@@@ did not find any crossings between in2out 
-                                                                   %@@@ and the end of the box 
+                                
+                                    if (min_pos == 0)              
                                         for k1 = 1:out2in_count
                                             if (out2in_gridboxdist(k1) < min_val)
                                                 min_pos = k1;
@@ -492,108 +536,214 @@ for i = 1:N
                                             end;
                                         end;                                                                                    
                                     end;
+                            
+                                    if (subseg_acc(min_pos) == 1)                                                              
+                                        close_bound = 1;          
+                                        ending_edge = in2out_gridbox(curr_seg);
+                                    else 
+                                        kend = out2in_gridbox(min_pos);
+                                        x_mid = [];
+                                        y_mid = [];
 
-                                    kend = out2in_gridbox(min_pos);
-                                    x_mid = [];
-                                    y_mid = [];
+                                        %@@@ If the boundary polygon crosses 
+                                        %@@@ the grid domain along different
+                                        %@@@ domain edges then include the 
+                                        %@@@ common grid domain corner points
 
-                                    %@@@ If the boundary polygon crosses the grid domain along different
-                                    %@@@ domain edges then include the common grid domain corner points
-
-                                    if (kstart ~= kend)
-                                        if (kstart < kend)
-                                            for k1 = kstart:(kend-1)
-                                                x_mid = [x_mid;px(k1+1)];
-                                                y_mid = [y_mid;py(k1+1)];
-                                            end;
-                                        else
-                                            for k1 = kstart:4
-                                                x_mid = [x_mid;px(k1+1)];
-                                                y_mid = [y_mid;py(k1+1)];
-                                            end;
-                                            for k1 = 1:(kend-1)
-                                                x_mid = [x_mid;px(k1+1)];
-                                                y_mid = [y_mid;py(k1+1)];
+                                        
+                                        if (kstart ~= kend)
+                                            if (kstart < kend)
+                                                for k1 = kstart:(kend-1)
+                                                    if (domain_inb(k1+1) == 1 ...
+                                                            && crnr_acc(k1+1) == 0)
+                                                        x_mid = [x_mid;px(k1+1)];
+                                                        y_mid = [y_mid;py(k1+1)];
+                                                        crnr_acc(k1+1) = 1;
+                                                    end;
+                                                end;
+                                            else
+                                                for k1 = kstart:4
+                                                    if (domain_inb(k1+1) == 1 ...
+                                                            && crnr_acc(k1+1) == 0)
+                                                        x_mid = [x_mid;px(k1+1)];
+                                                        y_mid = [y_mid;py(k1+1)];
+                                                        crnr_acc(k1+1) = 1;
+                                                    end;
+                                                end;
+                                                for k1 = 1:(kend-1)
+                                                    if (domain_inb(k1+1) == 1 ...
+                                                            && crnr_acc(k1+1) == 0)
+                                                        x_mid = [x_mid;px(k1+1)];
+                                                        y_mid = [y_mid;py(k1+1)];
+                                                        crnr_acc(k1+1) = 1;
+                                                    end;
+                                                end;
                                             end;
                                         end;
-                                    end;
-
-                                    if (~isempty(x_mid))
-                                        bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;x_mid];
-                                        bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;y_mid];
-                                    end;
-
-                                    %@@@ Check if next crossing from out to in matches starting point of 
-                                    %@@@ new boundary segment. If yes, then close the boundary
-
-                                    if (min_pos == seg_start)             %@@@ need to close the grid
-
-                                        bound_ingrid(in_coord).x(end+1) = bound_ingrid(in_coord).x(1);
-                                        bound_ingrid(in_coord).y(end+1) = bound_ingrid(in_coord).y(1);
-                                        bound_count = length(bound_ingrid(in_coord).x);
-                                        bound_ingrid(in_coord).n = bound_count;                                 
-                                        bound_ingrid(in_coord).east = max(bound_ingrid(in_coord).x);
-                                        bound_ingrid(in_coord).west = min(bound_ingrid(in_coord).x);
-                                        bound_ingrid(in_coord).north = max(bound_ingrid(in_coord).y);
-                                        bound_ingrid(in_coord).south = min(bound_ingrid(in_coord).y);
-                                        bound_ingrid(in_coord).height = bound_ingrid(in_coord).north ...
-                                                            - bound_ingrid(in_coord).south;
-                                        bound_ingrid(in_coord).width = bound_ingrid(in_coord).east ...
-                                                            - bound_ingrid(in_coord).west;
-                                        bound_ingrid(in_coord).level = 1;
-                                        in_coord=in_coord+1;            %@@@ increment boundary counter
-                                        new_bound=1;                    %@@@ reset flag to exit the boundary loop
-                                                                        %@@@ and start new boundary
-                    
-				    else                                %@@@ add segment to the boundary 
-
+                                    
+                                        if (~isempty(x_mid))
+                                            bound_x = [bound_x;x_mid];
+                                            bound_y = [bound_y;y_mid];
+                                        end;
+                                    
+                                        %@@@ Adding the segment
+                                    
                                         if (~isnan(out2in_xcross(min_pos)))
-                                            bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;...
-                                                               out2in_xcross(min_pos)];
-                                            bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;...
-                                                               out2in_ycross(min_pos)];
+                                            bound_x = [bound_x;...
+                                                           out2in_xcross(min_pos)];
+                                            bound_y = [bound_y;...
+                                                           out2in_ycross(min_pos)];
                                         end;
 
                                         if ((out2in(min_pos)+1) <= in2out(min_pos))                                        
-                                            bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;...
-                                                               bound(i).x((out2in(min_pos)+1):...
-                                                                                in2out(min_pos))];
-                                            bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;...
-                                                               bound(i).y((out2in(min_pos)+1):...
-                                                                                in2out(min_pos))];                                        
+                                            bound_x = [bound_x;...
+                                                           bound(i).x((out2in(min_pos)+1):...
+                                                                        in2out(min_pos))];
+                                            bound_y = [bound_y;...
+                                                           bound(i).y((out2in(min_pos)+1):...
+                                                                        in2out(min_pos))];                                        
                                         else
-                                            bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;...
-                                                               bound(i).x((out2in(min_pos)+1):n);...
-                                                               bound(i).x(2:in2out(min_pos))];
-                                            bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;...
-                                                               bound(i).y((out2in(min_pos)+1):n);...
-                                                               bound(i).y(2:in2out(min_pos))];      
+                                            bound_x = [bound_x;...
+                                                           bound(i).x((out2in(min_pos)+1):n);...
+                                                           bound(i).x(2:in2out(min_pos))];
+                                            bound_y = [bound_y;...
+                                                           bound(i).y((out2in(min_pos)+1):n);...
+                                                           bound(i).y(2:in2out(min_pos))];      
                                         end;
 
                                         if (~isnan(in2out_xcross(min_pos)))
-                                            bound_ingrid(in_coord).x = [bound_ingrid(in_coord).x;...
-                                                                          in2out_xcross(min_pos)];
-                                            bound_ingrid(in_coord).y = [bound_ingrid(in_coord).y;...
-                                                                          in2out_ycross(min_pos)];
+                                            bound_x = [bound_x;in2out_xcross(min_pos)];
+                                            bound_y = [bound_y;in2out_ycross(min_pos)];
                                         end;
 
-                                        seg_index = min_pos;
-                                        subseg_acc(min_pos) = 1;     %@@@ activate flag that segment has been 
-                                                                     %@@@ accounted for
+                                        subseg_acc(min_pos) = 1;
+                                        ending_edge = in2out_gridbox(min_pos);
+                                        seg_index = min_pos;                             
+                                    end;
+                                    
+                                end;
+                                
+                            end;
+                            
+                            %@@@ Need to close the grid;
+                            
+                            if (ending_edge ~= starting_edge)
+                                if (ending_edge < starting_edge)
+                                    for k = ending_edge:(starting_edge-1)
+                                        if (crnr_acc(k+1) == 0 && ...
+                                                domain_inb(k+1) == 1)
+                                            bound_x = [bound_x;px(k+1)];
+                                            bound_y = [bound_y;py(k+1)];
+                                            crnr_acc(k+1) = 1;
+                                        end;
+                                    end;
+                                else
+                                    for k = ending_edge:4
+                                        if (crnr_acc(k+1) == 0 && ...
+                                                domain_inb(k+1) == 1)
+                                            bound_x = [bound_x;px(k+1)];
+                                            bound_y = [bound_y;py(k+1)];
+                                            crnr_acc(k+1) = 1;
+                                        end;
+                                    end;
+                                    for k =1:(starting_edge-1)
+                                       if (crnr_acc(k+1) == 0 && ...
+                                               domain_inb(k+1) == 1)
+                                            bound_x = [bound_x;px(k+1)];
+                                            bound_y = [bound_y;py(k+1)];
+                                            crnr_acc(k+1) = 1;
+                                        end;
+                                    end;
+                                end;
+                            end;
+                            
+                            bound_x(end+1) = bound_x(1);
+                            bound_y(end+1) = bound_y(1);
+                            
+                            %@@@ Making sure that the added points do not
+                            %@@@ exceed max. defined seg length
+                            
+                            clear xt1 xt2 yt1 yt2 dist loc x_set y_set;
+                            nsample = length(bound_x);
+                            xt1 = bound_x(1:end-1);
+                            yt1 = bound_y(1:end-1);
+                            xt2 = bound_x(2:end);
+                            yt2 = bound_y(2:end);
+                            
+                            dist = sqrt((xt2-xt1).^2+(yt2-yt1).^2);
+                            loc = find(dist > 2*MAX_SEG_LENGTH);
+                            
+                            if (~isempty(loc))
+                                x_set = bound_x(1:loc(1));
+                                y_set = bound_y(1:loc(1));
+                                nc = length(loc);
+                                for k = 1:nc
+                                    xp = bound_x(loc(k));
+                                    yp = bound_y(loc(k));
+                                    xn = bound_x(loc(k)+1);
+                                    yn = bound_y(loc(k)+1);
+                                    ns = floor(dist(loc(k))/MAX_SEG_LENGTH)-1;
+                                    if (ns > 0)
+                                        if (xp == xn)
+                                            x_set = [x_set;ones(ns,1)*xp];
+                                            y_set = [y_set;(yp+sign(yn-yp)...
+                                                *(1:ns)'*MAX_SEG_LENGTH)];
+                                        else
+                                            mth = atan2(yn-yp,xn-xp);
+                                            x_set = [x_set;(xp+[1:ns]'...
+                                                *MAX_SEG_LENGTH*cos(mth))];
+                                            y_set = [y_set;(yp+[1:ns]'...
+                                                *MAX_SEG_LENGTH*sin(mth))];
+                                        end;
+                                    end;
+                                    x_set = [x_set;xn];
+                                    y_set = [y_set;yn];
+                                    if k == nc
+                                        if ((loc(k)+1) < nsample)
+                                            x_set = [x_set;bound_x((loc(k)+2:end))];
+                                            y_set = [y_set;bound_y((loc(k)+2:end))];
+                                        end;
+                                    else
+                                        if ((loc(k)+1) < loc(k+1))
+                                            x_set = [x_set;bound_x((loc(k)+2):loc(k+1))];
+                                            y_set = [y_set;bound_y((loc(k)+2):loc(k+1))];
+                                        end;
+                                    end;
+                                end;
+                            else
+                                x_set = bound_x;
+                                y_set = bound_y;
+                            end;
+                            
+                            %@@@ Setting up the boundary polygon
+                            
+                            bound_ingrid(in_coord).x = x_set;
+                            bound_ingrid(in_coord).y = y_set;
+                            bound_count = length(bound_ingrid(in_coord).x);
+                            bound_ingrid(in_coord).n = bound_count;                                 
+                            bound_ingrid(in_coord).east = max(bound_ingrid(in_coord).x);
+                            bound_ingrid(in_coord).west = min(bound_ingrid(in_coord).x);
+                            bound_ingrid(in_coord).north = max(bound_ingrid(in_coord).y);
+                            bound_ingrid(in_coord).south = min(bound_ingrid(in_coord).y);
+                            bound_ingrid(in_coord).height = bound_ingrid(in_coord).north ...
+                                            - bound_ingrid(in_coord).south;
+                            bound_ingrid(in_coord).width = bound_ingrid(in_coord).east ...
+                                            - bound_ingrid(in_coord).west;
+                            bound_ingrid(in_coord).level = 1;
+                                                       
+                            in_coord=in_coord+1;    %@@@ increment boundary 
+                                                    %@@@ counter                                                                       
 
-                                    end; %@@@ end corresponding to check if min_pos == seg_start
+                            crnr_acc(1) = crnr_acc(end);
 
-                                end; %@@@ end of while loop for new_bound. This loop exits when a
-                                     %@@@ a boundary is closed and a new one has to be started
-
-			    end;     %@@@ corresponds to if subseg_acc(j) == 0
-
-			end;         %@@@ corresponds to while loop that checks if all sections (subseg_acc)
-                                     %@@@ have been accounted for. Loop exits when all accounted for
+                        end;         %@@@ corresponds to while loop that 
+                                     %@@@ checks if all sections (subseg_acc) 
+                                     %@@@ have been accounted for. 
                    
-		    end;             %@@@ corresponds to if in2out_count > 0 (i.e. there are finite domain crossings)
-
-                end;                 %@@@ corresponds to if statement checking if there are boundary points inside 
+                    end;             %@@@ corresponds to if in2out_count > 0 
+                                   
+                end;                 %@@@ corresponds to if statement checking 
+                                     %@@@ if there are boundary points inside 
                                      %@@@ the domain
 
             else                     %@@@ boundary lies completely inside the grid
@@ -616,14 +766,18 @@ for i = 1:N
                 bound_ingrid(in_coord).west = min(bound_ingrid(in_coord).x);
                 bound_ingrid(in_coord).north = max(bound_ingrid(in_coord).y);
                 bound_ingrid(in_coord).south = min(bound_ingrid(in_coord).y);
-                bound_ingrid(in_coord).height = bound_ingrid(in_coord).north - bound_ingrid(in_coord).south;
-                bound_ingrid(in_coord).width = bound_ingrid(in_coord).east-bound_ingrid(in_coord).west;
+                bound_ingrid(in_coord).height = bound_ingrid(in_coord).north ...
+                    - bound_ingrid(in_coord).south;
+                bound_ingrid(in_coord).width = bound_ingrid(in_coord).east ...
+                    - bound_ingrid(in_coord).west;
                 bound_ingrid(in_coord).level = 1;
                 in_coord = in_coord+1;
 
-            end;     %@@@ corresponds to if statement that determines if boundary lies partially/completely in domain
+            end;     %@@@ corresponds to if statement that determines if boundary 
+                     %@@@ lies partially/completely in domain
 
-        end;         %@@@ corresponds to if statement that determines if boundary  lies outside the domain
+        end;         %@@@ corresponds to if statement that determines if boundary  
+                     %@@@ lies outside the domain
 
     end;             %@@@ corresponds to if statement that determines boundary type
 
@@ -631,8 +785,9 @@ for i = 1:N
 
     itmp_prev = itmp;
     itmp = floor(i/N*100);
-    if (mod(itmp,5)==0 & itmp_prev ~= itmp & N > 100)
-        fprintf(1,'Completed %d per cent of %d boundaries and found %d internal boundaries \n',itmp,N,in_coord-1);
+    if (mod(itmp,5)==0 && itmp_prev ~= itmp && N > 100)
+        fprintf(1,'Completed %d per cent of %d boundaries and found %d internal boundaries \n',...
+            itmp,N,in_coord-1);
     end;
 
 end;     %@@@ end of for loop that loops through all the GSHHS boundaries

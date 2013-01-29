@@ -1,32 +1,30 @@
-function [messg,errno] = write_wwIIIobstr(fname,d1,d2);
+function [messg,errno] = write_ww3obstr(fname,d1,d2)
 
-% -------------------------------------------------------------------------------------
-%|                                                                                     |
-%|                          +----------------------------+                             |
-%|                          | GRIDGEN          NOAA/NCEP |                             |
-%|                          |      Arun Chawla           |                             |
-%|                          |                            |                             |
-%|                          | Last Update :  31-Jul-2007 |                             |
-%|                          +----------------------------+                             |
-%|                                    Arun.Chawla@noaa.gov                             |
-%|                          Distributed with WAVEWATCH III                             |
-%|                                                                                     |
-%|                     Copyright 2009 National Weather Service (NWS),                  |
-%|       National Oceanic and Atmospheric Administration.  All rights reserved.        |
-%|                                                                                     |
-%| DESCRIPTION                                                                         |
-%| Write the output arrays into ascii file                                             |
-%|                                                                                     |
-%| write_wwIIIfile(fname,d1,d2)                                                        |
-%|                                                                                     |
-%| INPUT                                                                               |
-%|  fname       : Output file name                                                     |
-%|  d1,d2       : Output 2D obstruction arrays in x (d1) and y (d2)                    |
-%|                                                                                     |
-%| OUTPUT                                                                              |
-%|  messg       : Error message. Is blank if no error occurs                           |
-%|  errno       : Error number. Is zero for succesful write                            |
-% -------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+%|                                                                        |
+%|                    +----------------------------+                      |
+%|                    | GRIDGEN          NOAA/NCEP |                      |
+%|                    |                            |                      |
+%|                    | Last Update :  23-Oct-2012 |                      |
+%|                    +----------------------------+                      | 
+%|                     Distributed with WAVEWATCH III                     |
+%|                                                                        |
+%|                 Copyright 2009 National Weather Service (NWS),         |
+%|  National Oceanic and Atmospheric Administration.  All rights reserved.|
+%|                                                                        |
+%| DESCRIPTION                                                            |
+%| Write the output arrays into ascii file                                |
+%|                                                                        |
+%| write_ww3file(fname,d1,d2)                                             |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  fname       : Output file name                                        |
+%|  d1,d2       : Output 2D obstruction arrays in x (d1) and y (d2)       |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  messg       : Error message. Is blank if no error occurs              |
+%|  errno       : Error number. Is zero for succesful write               |
+% -------------------------------------------------------------------------
 
 [Ny,Nx] = size(d1);
 

@@ -34,6 +34,16 @@ Files         :  There are 3 sub-directories
 
 Addendums     : 1. The generate_grid function now has two extra parameters that need to be set before the call can
                    be made -- a cut-off depth and a representative depth for dry cells.
+                2. Matlab now has built in support for NETCDF and those have been incorporated in the generate_grid.m 
+                   routine
+                3. A series of bugs were cleaned up. These are 
+                   a) Getting rid of spurious NaN values in generate_grid
+                   b) Changing the algorithm in compute_boundary to remove errors associated with improper
+                      closing of certain boundaries
+                   c) Speed up in the clean_mask routine
+                   d) Generating grids only in the 0 - 360 lon range (this is the range in which the 
+                      boundaries are defined, and switching to -180 - 180 range was leading to improper
+                      treatment of boundary closure in certain cases.
 ----------------------------------------------------------------------------------------------------------------
-Last updated  : 05/09/2007
+Last updated  : 10/24/2012
 Bug reports   : arun.chawla@noaa.gov

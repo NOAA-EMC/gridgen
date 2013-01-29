@@ -1,34 +1,34 @@
-function bound_ingrid = split_boundary(bound,lim,icoords)
+function bound_ingrid = split_boundary(bound,lim)
 
-% -------------------------------------------------------------------------------------
-%|                                                                                     |
-%|                          +----------------------------+                             |
-%|                          | GRIDGEN          NOAA/NCEP |                             |
-%|                          |      Arun Chawla           |                             |
-%|                          |                            |                             |
-%|                          | Last Update :  31-Jul-2007 |                             |
-%|                          +----------------------------+                             |
-%|                                    Arun.Chawla@noaa.gov                             |
-%|                          Distributed with WAVEWATCH III                             |
-%|                                                                                     |
-%|                     Copyright 2009 National Weather Service (NWS),                  |
-%|       National Oceanic and Atmospheric Administration.  All rights reserved.        |
-%|                                                                                     |
-%| DESCRIPTION                                                                         |
-%| This function splits up large boundary segments into smaller ones so that they are  |
-%| more managable                                                                      |
-%|                                                                                     |
-%| bound_ingrid = split_boundary(bound,lim)                                            |
-%|                                                                                     |
-%| INPUT                                                                               |
-%|  bound : Data structure array of boundary polygons that lie inside the grid domain  |
-%|  lim   : Limiting size to determine if a polygon needs to be split or not           |
-%|                                                                                     |
-%| OUTPUT                                                                              |
-%| bound_ingrid : A new data structure of boundary polygons where the larger polygons  |
-%|                have been split up to more managable smaller sizes                   |
-%|                                                                                     |
-% -------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+%|                                                                        |
+%|                    +----------------------------+                      |
+%|                    | GRIDGEN          NOAA/NCEP |                      |
+%|                    |                            |                      |
+%|                    | Last Update :  23-Oct-2012 |                      |
+%|                    +----------------------------+                      |
+%|                     Distributed with WAVEWATCH III                     |
+%|                                                                        |
+%|                 Copyright 2009 National Weather Service (NWS),         |
+%|  National Oceanic and Atmospheric Administration.  All rights reserved.|
+%|                                                                        |
+%| DESCRIPTION                                                            |
+%| This function splits up large boundary segments into smaller ones so   |
+%| that they are more managable                                           |
+%|                                                                        |
+%| bound_ingrid = split_boundary(bound,lim)                               |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  bound : Data structure array of boundary polygons that lie inside the |
+%|          grid domain                                                   |
+%|  lim   : Limiting size to determine if a polygon needs to be split     |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%| bound_ingrid : A new data structure of boundary polygons where the     |
+%|                larger polygons have been split up to more managable    |
+%|                smaller sizes                                           |
+%|                                                                        |
+% -------------------------------------------------------------------------
 
 eps = 1e-5;
 
@@ -60,9 +60,10 @@ for i = 1:N
                 lon_start = x_axis(lx);
                 lat_end = y_axis(ly+1);
                 lon_end = x_axis(lx+1);
-                i;
+                
                 [lat_start lon_start lat_end lon_end];
-                [bt,Nb] = compute_boundary([lat_start lon_start lat_end lon_end],bound(i),icoords); 
+                [bt,Nb] = compute_boundary([lat_start lon_start lat_end ...
+                    lon_end],bound(i)); 
                 if (Nb > 0)
                     bound_ingrid = [bound_ingrid bt];
                     in_coord = in_coord + Nb;
@@ -80,8 +81,9 @@ for i = 1:N
     end;
     itmp_prev = itmp;
     itmp = floor(i/N*100);
-    if (mod(itmp,5)==0 & itmp_prev ~= itmp & N > 100)
-        fprintf(1,'Completed %d per cent of %d boundaries and split into %d boundaries \n',itmp,N,in_coord-1);
+    if (mod(itmp,5)==0 && itmp_prev ~= itmp && N > 100)
+        fprintf(1,'Completed %d per cent of %d boundaries and split into %d boundaries \n',...
+            itmp,N,in_coord-1);
     end;
 end;   
 

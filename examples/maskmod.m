@@ -5,19 +5,19 @@
 
 % 0. Define paths
 
-  bin_dir = '/export/lnx375/wd20ac/matlab/gridgen1.0/bin';             % matlab scripts location
-  in_dir  = '/export/lnx375/wd20ac/matlab/gridgen1.0/examples/data';   %input directory (for grid files)
-  out_dir = '/export/lnx375/wd20ac/matlab/gridgen1.0/examples/data';   % output directory (for grid files)
+  bin_dir = '/$HOME/gridgen/bin';       % matlab scripts location
+  in_dir  = '/OUTPUT-PATH/data';        % input directory (for grid files)
+  out_dir = '/OUTPUT-PATH/data';        % output directory (for grid files)
 
   addpath(bin_dir,'-END');
 
 % 1. Read particulars from grid to be modified
  
-  fname = 'Alaska_reg';                                             % file name prefix
-  [lon,lat] = read_ww3meta([in_dir,'/',fname,'.meta']);             % read parameter file
+  fname = 'Alaska_reg';                                  % file name prefix
+  [lon,lat] = read_ww3meta([in_dir,'/',fname,'.meta']);  % read meta file
   Nx = length(lon);
   Ny = length(lat);
-  m = read_mask([in_dir,'/',fname,'.maskorig_ascii'],Nx,Ny);        % read mask file
+  m = read_mask([in_dir,'/',fname,'.maskorig_ascii'],Nx,Ny); % read mask file
 
 % 2. Read particulars from base grid (grid with which data has to be exchanged) 
 
@@ -37,20 +37,23 @@
 
 % 4. Compute the new mask
 
-  m_new = modify_mask(m,lon,lat,px,py,mb,lonb,latb,1);            % create the final mask
+  m_new = modify_mask(m,lon,lat,px,py,mb,lonb,latb,1);   
 
 % 5. You can have multiple polygons if needed
 
   px1 = [178 184 184 178 178];
   py1 = [70.5 70.5 72 72 70.5];
 
-  m_tmp = modify_mask(m,lon,lat,px1,py1,mb,lonb,latb,1);         % save the mask info for every polygon in 
-                                                               % a different variable
+  m_tmp = modify_mask(m,lon,lat,px1,py1,mb,lonb,latb,1); % save the mask info 
+                                                         % for every polygon in 
+                                                         % a different variable
 
-  loc = find(m_tmp~=3);                                        % determine the active cells
+  loc = find(m_tmp~=3);                                  % determine the active 
+                                                         % cells
 
-  m_new(loc) = m_tmp(loc);                                     % update the final mask for only those active
-  clear loc;                                                   % cells
+  m_new(loc) = m_tmp(loc);                               % update the final mask 
+                                                         % for only those active
+  clear loc;                                             % cells
 
 % 6. Write out new mask file
 

@@ -1,30 +1,28 @@
 function [lon,lat] = read_ww3meta(fname)
 
-% -------------------------------------------------------------------------------------
-%|                                                                                     |
-%|                          +----------------------------+                             |
-%|                          | GRIDGEN          NOAA/NCEP |                             |
-%|                          |      Arun Chawla           |                             |
-%|                          |                            |                             |
-%|                          | Last Update :  31-Jul-2007 |                             |
-%|                          +----------------------------+                             |
-%|                                    Arun.Chawla@noaa.gov                             |
-%|                          Distributed with WAVEWATCH III                             |
-%|                                                                                     |
-%|                     Copyright 2009 National Weather Service (NWS),                  |
-%|       National Oceanic and Atmospheric Administration.  All rights reserved.        |
-%|                                                                                     |
-%| DESCRIPTION                                                                         |
-%| Read the meta data file to obtain the lon and lat for a set of grids                |
-%|                                                                                     |
-%| [lon,lat] = read_ww3meta(fname)                                                     |
-%|                                                                                     |
-%| INPUT                                                                               |
-%|  fname       : Input meta data file name                                            |
-%|                                                                                     |
-%| OUTPUT                                                                              |
-%|  lon,lat     : Longitude array (x) and lattitude array (y) of the final grids       |
-% -------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+%|                                                                        |
+%|                    +----------------------------+                      |
+%|                    | GRIDGEN          NOAA/NCEP |                      |
+%|                    |                            |                      |
+%|                    | Last Update :  23-Oct-2012 |                      |
+%|                    +----------------------------+                      | 
+%|                     Distributed with WAVEWATCH III                     |
+%|                                                                        |
+%|                 Copyright 2009 National Weather Service (NWS),         |
+%|  National Oceanic and Atmospheric Administration.  All rights reserved.|
+%|                                                                        |
+%| DESCRIPTION                                                            |
+%| Read the meta data file to obtain the lon and lat for a set of grids   |
+%|                                                                        |
+%| [lon,lat] = read_ww3meta(fname)                                        |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  fname       : Input meta data file name                               |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  lon,lat     : Longitude array (x) and lattitude array (y) of grid     |
+% -------------------------------------------------------------------------
 
 fid = fopen(fname,'r');
 

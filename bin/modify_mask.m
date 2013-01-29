@@ -1,66 +1,49 @@
-function m_new = modify_mask2(m,lon,lat,px,py,mb,lonb,latb,igl);
+function m_new = modify_mask(m,lon,lat,px,py,mb,lonb,latb,igl)
 
-% -------------------------------------------------------------------------------------
-%|                                                                                     |
-%|                          +----------------------------+                             |
-%|                          | GRIDGEN          NOAA/NCEP |                             |
-%|                          |      Arun Chawla           |                             |
-%|                          |                            |                             |
-%|                          | Last Update :  31-Jul-2007 |                             |
-%|                          +----------------------------+                             |
-%|                                    Arun.Chawla@noaa.gov                             |
-%|                          Distributed with WAVEWATCH III                             |
-%|                                                                                     |
-%|                     Copyright 2009 National Weather Service (NWS),                  |
-%|       National Oceanic and Atmospheric Administration.  All rights reserved.        |
-%|                                                                                     |
-%| DESCRIPTION                                                                         |
-%| This routine was developed for WAVEWATCH III v3.10 or higher (multi-grid version)   | 
-%| where the traditional mask with values of 0 and 1 for land and water are            | 
-%| modified to give values of 0,1,2 and 3 for cells that are on land, water,           | 
-%| boundary or to be ignored, respectively. These masks are needed for grids           |
-%| that are nested with a larger grid from which they get their boundary information   |
-%|                                                                                     |
-%| m_new = modify_mask(m,lon,lat,px,py,mb,lonb,latb,igl)                               |
-%|                                                                                     |
-%| INPUT                                                                               |
-%|   m     : 2D land sea mask for grid                                                 |
-%|   lon   : longitude (x) coordinates of grid                                         |
-%|   lat   : lattitude (y) coordinates of grid                                         |
-%|   mb    : 2D mask for base grid (grid with which boundary data is exchanged)        |
-%|   lonb  : longitude (x) coordinates of base grid                                    |
-%|   latb  : lattitude (y) coordinates of base grid                                    |
-%|   px,py : x,y coordinates of polygon defining the region of active computation in   |
-%|           the grid                                                                  |
-%|   igl   : flag indicating if base grid is global (1) or not (0)                     |
-%|                                                                                     |
-%| OUTPUT                                                                              |
-%|   m_new : New 2D mask file with values ranging from 0-3.                            |
-%|              0 -> Active (within the computational region) dry cells                |
-%|              1 -> Active wet cells                                                  |
-%|              2 -> Boundary cells (for data exchange)                                |
-%|              3 -> Inactive cells                                                    |
-%|                                                                                     |
-% -------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+%|                                                                        |
+%|                    +----------------------------+                      |
+%|                    | GRIDGEN          NOAA/NCEP |                      |
+%|                    |                            |                      |
+%|                    | Last Update :  23-Oct-2012 |                      |
+%|                    +----------------------------+                      | 
+%|                     Distributed with WAVEWATCH III                     |
+%|                                                                        |
+%|                 Copyright 2009 National Weather Service (NWS),         |
+%|  National Oceanic and Atmospheric Administration.  All rights reserved.|
+%|                                                                        |
+%| DESCRIPTION                                                            |
+%| This routine was developed for WAVEWATCH III v3.10 or higher           | 
+%| (multi-grid version) where the traditional mask with values of 0 and 1 | 
+%| for land and water are modified to give values of 0,1,2 and 3 for cells| 
+%| that are on land, water, boundary or to be ignored, respectively. These|
+%| masks are needed for grids that are nested with a larger grid from     |
+%| which they get their boundary information                              |
+%|                                                                        |
+%| m_new = modify_mask(m,lon,lat,px,py,mb,lonb,latb,igl)                  |
+%|                                                                        |
+%| INPUT                                                                  |
+%|   m     : 2D land sea mask for grid                                    |
+%|   lon   : longitude (x) coordinates of grid                            |
+%|   lat   : lattitude (y) coordinates of grid                            |
+%|   mb    : 2D mask for base grid (grid with which boundary data is      |
+%|           exchanged)                                                   |
+%|   lonb  : longitude (x) coordinates of base grid                       |
+%|   latb  : lattitude (y) coordinates of base grid                       |
+%|   px,py : x,y coordinates of polygon defining the region of active     |
+%|           computation in the grid                                      |
+%|   igl   : flag indicating if base grid is global (1) or not (0)        |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|   m_new : New 2D mask file with values ranging from 0-3.               |
+%|              0 -> Active (within the computational region) dry cells   |
+%|              1 -> Active wet cells                                     |
+%|              2 -> Boundary cells (for data exchange)                   |
+%|              3 -> Inactive cells                                       |
+%|                                                                        |
+% ------------------------------------------------------------------------
 
 m_new = m;
-
-% Use the center of the grid as reference point
-
-%lon0 = mean(lon);
-%lat0 = mean(lat);
-%R = 6370000;
-
-% Convert to Cartesian coordinates
-
-%lon = R.*cos(lat0*pi/180.0).*(lon-lon0).*pi/180.0;
-%lat = R.*(lat-lat0).*pi/180.0;
-%lonb = R.*cos(lat0*pi/180.0).*(lonb-lon0).*pi/180.0;
-%latb = R.*(latb-lat0).*pi/180.0;
-%px = R.*cos(lat0*pi/180.0).*(px-lon0).*pi/180.0;
-%py = R.*(py-lat0).*pi/180.0;
-
-%
  
 [lon2,lat2] = meshgrid(lon,lat);
 [in_points,on_points] = inpolygon(lon2,lat2,px,py);
@@ -79,8 +62,8 @@ length(loc);
 m_new(loc) = 2;
 clear loc;
 
-dx = lon(2)-lon(1)
-dy = lat(2)-lat(1)
+dx = lon(2)-lon(1);
+dy = lat(2)-lat(1);
 
 N = length(px);
 
@@ -96,7 +79,8 @@ itmp = 0;
 
 for j = 1:Nx
     for i = 1:Ny-1
-        if (((m_new(i,j) == 1 & m_new(i+1,j) == 3)) || (m_new(i,j) == 3 & m_new(i+1,j) == 1))
+        if (((m_new(i,j) == 1 && m_new(i+1,j) == 3)) || ...
+                (m_new(i,j) == 3 && m_new(i+1,j) == 1))
             trans_lth = [];
             for k = i:i+1
                 lons = lon(j)-0.5*dx;
@@ -121,8 +105,9 @@ for j = 1:Nx
                 trans_lth(k-i+1) = 0;
                 [poly_bound,on_pts] = inpolygon(px,py,px1,py1);                
                 for l = 1:N-1
-                    if (poly_bound(l) == 1 & poly_bound(l+1) == 1)
-                        trans_lth(k-i+1) = trans_lth(k-i+1) + sqrt((px(l+1)-px(l))^2+(py(l+1)-py(l))^2);
+                    if (poly_bound(l) == 1 && poly_bound(l+1) == 1)
+                        trans_lth(k-i+1) = trans_lth(k-i+1) + ...
+                            sqrt((px(l+1)-px(l))^2+(py(l+1)-py(l))^2);
                     else
                         x1 = px(l);
                         x2 = px(l+1);
@@ -152,23 +137,29 @@ for j = 1:Nx
                         for r = 1:4                            
                             if (mt == m_grid(r))
                                 if (mt == 0)
-                                    if (y1>= min(py1(r:r+1)) & y1<= max(py1(r:r+1)))
+                                    if (y1>= min(py1(r:r+1)) && ...
+                                            y1<= max(py1(r:r+1)))
                                         y = y1;
-                                        if (poly_bound(l) == 1 & poly_bound(l+1) == 0)
+                                        if (poly_bound(l) == 1 && ...
+                                                poly_bound(l+1) == 0)
                                             count = count+1;
                                             tx(count) = x2;
                                             ty(count) = y;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 1)
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 1)
                                             count = count+1;
                                             tx(count) = x1;
                                             ty(count) = y;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 0)
-                                            if (px1(r) >= min([x1 x2]) & px1(r) <= max([x1 x2]))
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 0)
+                                            if (px1(r) >= min([x1 x2]) && ...
+                                                    px1(r) <= max([x1 x2]))
                                                 count = count+1;
                                                 tx(count) = px1(r);
                                                 ty(count) = y;
                                             end;
-                                            if (px1(r+1) >= min([x1 x2]) & px1(r+1) <= max([x1 x2]))
+                                            if (px1(r+1) >= min([x1 x2]) && ...
+                                                    px1(r+1) <= max([x1 x2]))
                                                 count = count+1;
                                                 tx(count) = px1(r+1);
                                                 ty(count) = y;
@@ -176,23 +167,30 @@ for j = 1:Nx
                                         end;
                                     end;
                                 elseif (isinf(mt))
-                                    if (x1>= min(px1(r:r+1)) & x1<= max(px1(r:r+1)))
+                                    if (x1>= min(px1(r:r+1)) && ...
+                                            x1<= max(px1(r:r+1)))
                                         x = x1;
-                                        if (poly_bound(l) == 1 & poly_bound(l+1) == 0)
+                                        if (poly_bound(l) == 1 && ...
+                                                poly_bound(l+1) == 0)
                                             count = count+1;
                                             ty(count) = y2;
                                             tx(count) = x;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 1)
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 1)
                                             count = count+1;
                                             ty(count) = y1;
                                             tx(count) = x;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 0)
-                                            if (py1(r) >= min([y1 y2]) & py1(r) <= max([y1 y2]))
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 0)
+                                            if (py1(r) >= min([y1 y2]) && ...
+                                                    py1(r) <= max([y1 y2]))
                                                 count = count+1;
                                                 ty(count) = py1(r);
                                                 tx(count) = x;
                                             end;
-                                            if (py1(r+1) >= min([y1 y2]) & py1(r+1) <= max([y1 y2]))
+                                            if (py1(r+1) >= min([y1 y2]) ...
+                                                    && py1(r+1) <= ...
+                                                    max([y1 y2]))
                                                 count = count+1;
                                                 ty(count) = py1(r+1);
                                                 tx(count) = x;
@@ -211,7 +209,8 @@ for j = 1:Nx
                                     x = px1(r);
                                     y = mt*x+ct;
                                 end;
-                                d = sqrt((px1(r)-px1(r+1))^2+(py1(r)-py1(r+1))^2);
+                                d = sqrt((px1(r)-px1(r+1))^2+...
+                                    (py1(r)-py1(r+1))^2);
                                 d1 = sqrt((px1(r)-x)^2+(py1(r)-y)^2);
                                 d2 = sqrt((x-px1(r+1))^2+(y-py1(r+1))^2);                               
                                 if (abs(1-(d1+d2)/d) < 0.00001)
@@ -241,7 +240,8 @@ for j = 1:Nx
                                     y = typ(Nt);
                                     isc = 0;                                    
                                     for ct = 1:length(tx)
-                                        if (abs(x-tx(ct)) < 1e-10 & abs(y-ty(ct)) < 1e-10)
+                                        if (abs(x-tx(ct)) < 1e-10 ...
+                                                && abs(y-ty(ct)) < 1e-10)
                                             isc = 1;
                                             break;
                                         end;
@@ -254,12 +254,15 @@ for j = 1:Nx
                                 end;                               
                                 count = length(tx);
                             end;
-                            if (poly_bound(l) == 0 & poly_bound(l+1) == 0 & length(tx) > 1 & length(ty) > 1)
-                                trans_lth(k-i+1) = trans_lth(k-i+1) + sqrt((tx(2)-tx(1))^2+(ty(2)-ty(1))^2);
+                            if (poly_bound(l) == 0 && poly_bound(l+1) == 0 ...
+                                && length(tx) > 1 && length(ty) > 1)
+                                trans_lth(k-i+1) = trans_lth(k-i+1) + ...
+                                    sqrt((tx(2)-tx(1))^2+(ty(2)-ty(1))^2);
                             else       
                                 if (on_pts(l) == 1)
                                     for ct = 1:count
-                                        if (abs(tx(ct)-x1) < 1e-10 & abs(ty(ct)-y1) < 1e-10)
+                                        if (abs(tx(ct)-x1) < 1e-10 && ...
+                                                abs(ty(ct)-y1) < 1e-10)
                                             for ct2 = (ct+1):count
                                                 tx(ct2-1) = tx(ct2);
                                                 ty(ct2-1) = ty(ct2);
@@ -270,7 +273,8 @@ for j = 1:Nx
                                 end;
                                 if (on_pts(l+1) == 1)
                                     for ct = 1:count
-                                        if (abs(tx(ct)-x2) < 1e-10 & abs(ty(ct)-y2) < 1e-10)
+                                        if (abs(tx(ct)-x2) < 1e-10 && ...
+                                                abs(ty(ct)-y2) < 1e-10)
                                             for ct2 = (ct+1):count
                                                 tx(ct2-1) = tx(ct2);
                                                 ty(ct2-1) = ty(ct2);
@@ -281,9 +285,13 @@ for j = 1:Nx
                                 end;
                                 if (count ~= 0)                                    
                                     if (poly_bound(l) == 0)
-                                        trans_lth(k-i+1) = trans_lth(k-i+1) + sqrt((tx(1)-x2)^2+(ty(1)-y2)^2);
+                                        trans_lth(k-i+1) = trans_lth(k-i+1) ...
+                                            + sqrt((tx(1)-x2)^2+ ...
+                                            (ty(1)-y2)^2);
                                     else
-                                        trans_lth(k-i+1) = trans_lth(k-i+1) + sqrt((tx(1)-x1)^2+(ty(1)-y1)^2);
+                                        trans_lth(k-i+1) = trans_lth(k-i+1) ...
+                                            + sqrt((tx(1)-x1)^2+ ...
+                                            (ty(1)-y1)^2);
                                     end;
                                 end;
                             end;
@@ -303,7 +311,7 @@ for j = 1:Nx
         Nl = (j-1)*(Ny-1) + i;
         itmp_prev = itmp;
         itmp = floor(Nl/Nb*100);
-        if (mod(itmp,5)==0 & itmp_prev ~= itmp)
+        if (mod(itmp,5)==0 && itmp_prev ~= itmp)
            fprintf(1,'Completed %d per cent of the cells\n',itmp);
         end;
     end;
@@ -319,7 +327,8 @@ itmp = 0;
 
 for i = 1:Ny
     for j = 1:Nx-1
-        if (((m_new(i,j) == 1 & m_new(i,j+1) == 3)) || (m_new(i,j) == 3 & m_new(i,j+1) == 1))
+        if (((m_new(i,j) == 1 && m_new(i,j+1) == 3)) || (m_new(i,j) == 3 ...
+                && m_new(i,j+1) == 1))
             trans_lth = [];
             for k = j:j+1
                 lons = lon(k)-0.5*dx;
@@ -344,8 +353,9 @@ for i = 1:Ny
                 trans_lth(k-j+1) = 0;
                 [poly_bound,on_pts] = inpolygon(px,py,px1,py1);
                 for l = 1:N-1
-                    if (poly_bound(l) == 1 & poly_bound(l+1) == 1)
-                        trans_lth(k-j+1) = trans_lth(k-j+1) + sqrt((px(l+1)-px(l))^2+(py(l+1)-py(l))^2);
+                    if (poly_bound(l) == 1 && poly_bound(l+1) == 1)
+                        trans_lth(k-j+1) = trans_lth(k-j+1) + ...
+                            sqrt((px(l+1)-px(l))^2+(py(l+1)-py(l))^2);
                     else
                         x1 = px(l);
                         x2 = px(l+1);
@@ -376,23 +386,30 @@ for i = 1:Ny
                         for r = 1:4
                             if (mt == m_grid(r))
                                 if (mt == 0)
-                                    if (y1>= min(py1(r:r+1)) & y1<= max(py1(r:r+1)))
+                                    if (y1>= min(py1(r:r+1)) && ...
+                                            y1<= max(py1(r:r+1)))
                                         y = y1;
-                                        if (poly_bound(l) == 1 & poly_bound(l+1) == 0)
+                                        if (poly_bound(l) == 1 && ...
+                                                poly_bound(l+1) == 0)
                                             count = count+1;
                                             tx(count) = x2;
                                             ty(count) = y;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 1)
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 1)
                                             count = count+1;
                                             tx(count) = x1;
                                             ty(count) = y;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 0)
-                                            if (px1(r) >= min([x1 x2]) & px1(r) <= max([x1 x2]))
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 0)
+                                            if (px1(r) >= min([x1 x2]) && ...
+                                                    px1(r) <= max([x1 x2]))
                                                 count = count+1;
                                                 tx(count) = px1(r);
                                                 ty(count) = y;
                                             end;
-                                            if (px1(r+1) >= min([x1 x2]) & px1(r+1) <= max([x1 x2]))
+                                            if (px1(r+1) >= min([x1 x2]) ...
+                                                    && px1(r+1) <= ...
+                                                    max([x1 x2]))
                                                 count = count+1;
                                                 tx(count) = px1(r+1);
                                                 ty(count) = y;
@@ -400,23 +417,31 @@ for i = 1:Ny
                                         end;
                                     end;
                                 elseif (isinf(mt))
-                                    if (x1>= min(px1(r:r+1)) & x1<= max(px1(r:r+1)))
+                                    if (x1>= min(px1(r:r+1)) && ...
+                                            x1<= max(px1(r:r+1)))
                                         x = x1;
-                                        if (poly_bound(l) == 1 & poly_bound(l+1) == 0)
+                                        if (poly_bound(l) == 1 && ...
+                                                poly_bound(l+1) == 0)
                                             count = count+1;
                                             ty(count) = y2;
                                             tx(count) = x;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 1)
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 1)
                                             count = count+1;
                                             ty(count) = y1;
                                             tx(count) = x;
-                                        elseif (poly_bound(l) == 0 & poly_bound(l+1) == 0)
-                                            if (py1(r) >= min([y1 y2]) & py1(r) <= max([y1 y2]))
+                                        elseif (poly_bound(l) == 0 && ...
+                                                poly_bound(l+1) == 0)
+                                            if (py1(r) >= min([y1 y2]) ...
+                                                    && py1(r) <= ...
+                                                    max([y1 y2]))
                                                 count = count+1;
                                                 ty(count) = py1(r);
                                                 tx(count) = x;
                                             end;
-                                            if (py1(r+1) >= min([y1 y2]) & py1(r+1) <= max([y1 y2]))
+                                            if (py1(r+1) >= min([y1 y2]) ...
+                                                    && py1(r+1) <= ...
+                                                    max([y1 y2]))
                                                 count = count+1;
                                                 ty(count) = py1(r+1);
                                                 tx(count) = x;
@@ -435,7 +460,8 @@ for i = 1:Ny
                                     x = px1(r);
                                     y = mt*x+ct;
                                 end;                                
-                                d = sqrt((px1(r)-px1(r+1))^2+(py1(r)-py1(r+1))^2);
+                                d = sqrt((px1(r)-px1(r+1))^2+...
+                                    (py1(r)-py1(r+1))^2);
                                 d1 = sqrt((px1(r)-x)^2+(py1(r)-y)^2);
                                 d2 = sqrt((x-px1(r+1))^2+(y-py1(r+1))^2);                                
                                 if (abs(1-(d1+d2)/d) < 0.00001 )
@@ -466,7 +492,8 @@ for i = 1:Ny
                                     y = typ(Nt);
                                     isc = 0;                                    
                                     for ct = 1:length(tx)
-                                        if (abs(x-tx(ct)) < 1e-10 & abs(y-ty(ct)) < 1e-10)
+                                        if (abs(x-tx(ct)) < 1e-10 && ...
+                                                abs(y-ty(ct)) < 1e-10)
                                             isc = 1;
                                             break;
                                         end;
@@ -479,12 +506,15 @@ for i = 1:Ny
                                 end;                               
                                 count = length(tx);
                             end;
-                            if (poly_bound(l) == 0 & poly_bound(l+1) == 0 & length(tx) > 1 & length(ty) > 1)
-                                trans_lth(k-j+1) = trans_lth(k-j+1) + sqrt((tx(2)-tx(1))^2+(ty(2)-ty(1))^2);
+                            if (poly_bound(l) == 0 && poly_bound(l+1) == 0 ...
+                                    && length(tx) > 1 && length(ty) > 1)
+                                trans_lth(k-j+1) = trans_lth(k-j+1) + ...
+                                    sqrt((tx(2)-tx(1))^2+(ty(2)-ty(1))^2);
                             else
                                 if (on_pts(l) == 1)
                                     for ct = 1:count
-                                        if (abs(tx(ct)-x1) < 1e-10 & abs(ty(ct)-y1) < 1e-10)
+                                        if (abs(tx(ct)-x1) < 1e-10 && ...
+                                                abs(ty(ct)-y1) < 1e-10)
                                             for ct2 = (ct+1):count
                                                 tx(ct2-1) = tx(ct2);
                                                 ty(ct2-1) = ty(ct2);
@@ -495,7 +525,8 @@ for i = 1:Ny
                                 end;
                                 if (on_pts(l+1) == 1)
                                     for ct = 1:count
-                                        if (abs(tx(ct)-x2) < 1e-10 & abs(ty(ct)-y2) < 1e-10)
+                                        if (abs(tx(ct)-x2) < 1e-10 && ...
+                                                abs(ty(ct)-y2) < 1e-10)
                                             for ct2 = (ct+1):count
                                                 tx(ct2-1) = tx(ct2);
                                                 ty(ct2-1) = ty(ct2);
@@ -506,9 +537,11 @@ for i = 1:Ny
                                 end;
                                 if (count ~= 0)
                                     if (poly_bound(l) == 0)
-                                        trans_lth(k-j+1) = trans_lth(k-j+1) + sqrt((tx(1)-x2)^2+(ty(1)-y2)^2);
+                                        trans_lth(k-j+1) = trans_lth(k-j+1) ...
+                                            + sqrt((tx(1)-x2)^2+(ty(1)-y2)^2);
                                     else
-                                        trans_lth(k-j+1) = trans_lth(k-j+1) + sqrt((tx(1)-x1)^2+(ty(1)-y1)^2);
+                                        trans_lth(k-j+1) = trans_lth(k-j+1) ...
+                                            + sqrt((tx(1)-x1)^2+(ty(1)-y1)^2);
                                     end;
                                 end;
                             end;
@@ -528,7 +561,7 @@ for i = 1:Ny
         Nl = (i-1)*(Nx-1) + j;
         itmp_prev = itmp;
         itmp = floor(Nl/Nb*100);
-        if (mod(itmp,5)==0 & itmp_prev ~= itmp)
+        if (mod(itmp,5)==0 && itmp_prev ~= itmp)
            fprintf(1,'Completed %d per cent of the cells\n',itmp);
         end;
     end;
@@ -536,19 +569,19 @@ end;
 
 
 for i = 1:Ny
-    if (m(i,1) == 1 & in_points(i,1) == 1)
+    if (m(i,1) == 1 && in_points(i,1) == 1)
         m_new(i,1) = 2;
     end;
-    if (m(i,Nx) == 1 & in_points(i,Nx) == 1)
+    if (m(i,Nx) == 1 && in_points(i,Nx) == 1)
         m_new(i,Nx) = 2;
     end;
 end;
 
 for i = 1:Nx
-    if (m(1,i) == 1 & in_points(1,i) == 1)
+    if (m(1,i) == 1 && in_points(1,i) == 1)
         m_new(1,i) = 2;
     end;
-    if (m(Ny,i) == 1 & in_points(Ny,i) == 1)
+    if (m(Ny,i) == 1 && in_points(Ny,i) == 1)
         m_new(Ny,i) = 2;
     end;
 end;
@@ -575,11 +608,11 @@ for i = 1:Nr
         ry = 1 - ry;
         jy = jy-1;
     end;
-    if (jy == 0 & abs(ry-1) < 0.05) 
+    if (jy == 0 && abs(ry-1) < 0.05) 
         jy = 1;
         ry = 0;
     end;
-    if (jy == Nyb & abs(ry) < 0.05)
+    if (jy == Nyb && abs(ry) < 0.05)
         jy = jy-1;
         ry = 1;
     end;
@@ -593,11 +626,11 @@ for i = 1:Nr
     rx = rx - (jx-1);
  
     if (igl ~= 1) 
-        if (jx == 0 & abs(rx-1) < 0.05)
+        if (jx == 0 && abs(rx-1) < 0.05)
             jx = 1;
             rx = 0.;
         end;
-        if (jx == Nxb & abs(rx) < 0.05)
+        if (jx == Nxb && abs(rx) < 0.05)
             jx = jx-1;
             rx = 1;
         end;
@@ -619,10 +652,12 @@ for i = 1:Nr
     jy1 = jy;
     jy2 = jy+1;
 
-    flagok = (abs(mb(jy1,jx1)) == 1 || abs(mb(jy1,jx1)) == 2 || (1-rx)*(1-ry) < 0.05 ) & ...
-                 (abs(mb(jy1,jx2)) == 1 || abs(mb(jy1,jx2)) == 2 || rx*(1-ry) < 0.05 ) & ...
-                 (abs(mb(jy2,jx1)) == 1 || abs(mb(jy2,jx1)) == 2 || (1-rx)*ry < 0.05 ) & ...
-                     (abs(mb(jy2,jx2)) == 1 || abs(mb(jy2,jx2)) == 2 || rx*ry < 0.05 ); 
+    flagok = (abs(mb(jy1,jx1)) == 1 || abs(mb(jy1,jx1)) == 2 || ...
+        (1-rx)*(1-ry) < 0.05 ) & (abs(mb(jy1,jx2)) == 1 || ...
+        abs(mb(jy1,jx2)) == 2 || rx*(1-ry) < 0.05 ) & ...
+        (abs(mb(jy2,jx1)) == 1 || abs(mb(jy2,jx1)) == 2 || ...
+        (1-rx)*ry < 0.05 ) & (abs(mb(jy2,jx2)) == 1 || ...
+        abs(mb(jy2,jx2)) == 2 || rx*ry < 0.05 ); 
                
     if (flagok == 0)
         m_new(rows(i),cols(i)) = 3;
@@ -630,7 +665,7 @@ for i = 1:Nr
     end;
 end;
 
-loc = find(in_points == 0 & m == 0);
+loc = in_points == 0 & m == 0;
 m_new(loc) = 3;
 
 return;

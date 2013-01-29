@@ -1,32 +1,31 @@
 function [m1,m2] = read_obstr(fname,Nx,Ny)
 
-% -------------------------------------------------------------------------------------
-%|                                                                                     |
-%|                          +----------------------------+                             |
-%|                          | GRIDGEN          NOAA/NCEP |                             |
-%|                          |      Arun Chawla           |                             |
-%|                          |                            |                             |
-%|                          | Last Update :  24-Feb-2009 |                             |
-%|                          +----------------------------+                             |
-%|                                    Arun.Chawla@noaa.gov                             |
-%|                          Distributed with WAVEWATCH III                             |
-%|                                                                                     |
-%|                     Copyright 2009 National Weather Service (NWS),                  |
-%|       National Oceanic and Atmospheric Administration.  All rights reserved.        |
-%|                                                                                     |
-%| DESCRIPTION                                                                         |
-%| Read obstruction data from file                                                     |
-%|                                                                                     |
-%| [m1,m2] = read_mask(fname,Nx,Ny)                                                    |
-%|                                                                                     |
-%| INPUT                                                                               |
-%|  fname       : Input file name containing data                                      |
-%|  Nx,Ny       : Array dimensions in x and y                                          |
-%|                                                                                     |
-%| OUTPUT                                                                              |
-%|  m1           : 2D array with x obstruction data                                    |
-%|  m2           : 2D array with y obstruction data                                    |
-% -------------------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+%|                                                                        |
+%|                    +----------------------------+                      |
+%|                    | GRIDGEN          NOAA/NCEP |                      |
+%|                    |                            |                      |
+%|                    | Last Update :  23-Oct-2012 |                      |
+%|                    +----------------------------+                      | 
+%|                     Distributed with WAVEWATCH III                     |
+%|                                                                        |
+%|                 Copyright 2009 National Weather Service (NWS),         |
+%|  National Oceanic and Atmospheric Administration.  All rights reserved.|
+%|                                                                        |
+%| DESCRIPTION                                                            |
+%| Read obstruction data from file                                        |
+%|                                                                        |
+%| [m1,m2] = read_obstr(fname,Nx,Ny)                                      |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  fname       : Input file name containing data                         |
+%|  Nx,Ny       : Array dimensions in x and y                             |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  m1           : 2D array with x obstruction data                       |
+%|  m2           : 2D array with y obstruction data                       |
+% -------------------------------------------------------------------------
+
   
 fid = fopen(fname,'r');
 
