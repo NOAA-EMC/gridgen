@@ -60,6 +60,8 @@ if (errno == 0)
    fprintf(fid,'$ Sub-grid information \n');
    fprintf(fid,'%d  %f  %d  %d  %s  %s  %s  \n',30,N2,1,...
        1,'''(....)''','NAME',['''',fname,'.obstr_lev1','''']);
+   fprintf(fid,'%d  %d  %d  %s  %s  %s  \n',40,1,...
+       1,'''(....)''','NAME',['''',fname,'.mask','''']);
 
 else
    fprintf(1,'!!ERROR!!: %s \n',messg);
