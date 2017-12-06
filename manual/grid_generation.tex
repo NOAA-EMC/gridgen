@@ -1,0 +1,1128 @@
+\documentclass[12pt]{article}
+
+\oddsidemargin=0.4in
+\evensidemargin=0.4in
+\textwidth=5.7in
+\topmargin=-0.6in
+\textheight=8.5in
+
+\usepackage{epsfig}
+\usepackage{natbib}
+\usepackage{subfigure}
+\usepackage{alltt}
+
+%\newcommand{\pstyle}{myheadings}
+\newcommand{\pstyle}{plain}
+\newfont{\ff}{cmsl12}
+
+\newcommand{\first}{Part 1}
+\newcommand{\refs}{(\ldots references \ldots)}
+\newcommand{\p}{\partial}
+\newcommand{\degree}{^{\circ}}
+\newcommand{\bk}{\mbox{\boldmath $k$}}
+\newcommand{\bc}{\mbox{\boldmath $c$}}
+\newcommand{\lae}{$\lambda =$}
+\newcommand{\mue}{$\mu =$}
+\newcommand{\CCe}{$C =$}
+
+\newcommand{\pb}{\strut \vfill \pagebreak}
+\newcommand{\bpage}{\vfill \pagebreak \strut
+
+\vspace{2.5in} \centerline{This page is intentionally left blank.}}
+\newcommand{\bpagea}{\strut
+
+\vspace{2.5in} \centerline{This page is intentionally left blank.}}
+
+\newcommand{\newsec}{\setcounter{equation}{0}
+                     \setcounter{myfigno}{0}
+                     \setcounter{mytabno}{0}}
+
+\newcounter{myfigno}[section]
+\newenvironment{myfig}[1]{\begin{figure}[#1]
+                        \refstepcounter{myfigno}}
+                       {\end{figure}}
+\newenvironment{myfigx}[1]{\begin{figure}[#1]}
+                       {\end{figure}}
+\newcommand{\myfcap}[1]{\begin{list}{\ff Fig. \themyfigno\ :~\hfill}
+                      {\rightmargin 8mm \labelsep 0mm
+                       \labelwidth 8mm \leftmargin 8mm
+                       \topsep 0mm \parskip 0mm \partopsep 0mm }
+                       \item \ff #1 \end{list}}
+\newcommand{\myfcapc}[1]{\begin{center} \ff Fig. \themyfigno\ :~ #1
+                        \end{center}}
+\newcommand{\myfcapx}[1]{\begin{center} \ff #1 \end{center}}
+
+\newcounter{mytabno}[section]
+\newenvironment{mytab}[1]{\begin{table}[#1]
+                        \refstepcounter{mytabno}}
+                       {\end{table}}
+\newcommand{\mytcap}[1]{\begin{list}{\ff Table \themytabno :~\hfill}
+                      {\rightmargin 8mm \labelsep 0mm
+                       \labelwidth 8mm \leftmargin 8mm
+                       \topsep 0mm \parskip 0mm \partopsep 0mm }
+                       \item \ff #1 \end{list}
+                       \vspace{\baselineskip}}
+\newcommand{\mytcapc}[1]{\begin{center} \ff Table \themytabno : #1
+                        \end{center} \vspace{\baselineskip}}
+
+\renewcommand{\themyfigno}{\thesection.\arabic{myfigno}}
+\renewcommand{\themytabno}{\thesection.\arabic{mytabno}}
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+
+
+\hyphenation{Deut-schen}
+\hyphenation{wave-num-ber}
+
+\begin{document}
+
+%--------------------------------------------------------------%
+%           Title page                                         %
+%--------------------------------------------------------------%
+
+\pagestyle{empty}
+
+\strut \vspace{5mm}
+
+\begin{center}
+U. S. Department of Commerce \\
+National Oceanic and Atmospheric Administration \\
+National Weather Service \\
+National Centers for Environmental Prediction \\
+5830 University Research Ct \\
+College Park, MD 20740
+
+\vspace{15mm}
+
+{\bf Technical Note}
+
+\vspace{15mm}
+
+{\large Automated grid generation for WAVEWATCH III$^\dag$.}
+
+\vspace{20mm}
+
+Arun Chawla $^\ddag$ and Hendrik L. Tolman\\
+Environmental Modeling Center \\
+Marine Modeling and Analysis Branch
+
+\vspace{25mm}
+
+%\today\ (DRAFT)
+version 2.0, Feb 2014
+
+\vfill {\sc this is an unreviewed manuscript, primarily
+intended for informal exchange of information among ncep staff
+members}
+
+\end{center}
+\noindent \rule{140mm}{0.5mm} \\
+{\small $^\dag$ MMAB Contribution No.~254. \\
+$^\ddag$ e-mail: Arun.Chawla@NOAA.GOV}
+
+\bpage
+
+\pagebreak
+
+\markright{\fbox{\rm{DRAFT}} \hspace{2mm} \today}
+\pagestyle{\pstyle}
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+%--------------------------------------------------------------%
+%            Abstract                                          %
+%--------------------------------------------------------------%
+\addtocontents{toc}{\vspace{\baselineskip}}
+\addcontentsline{toc}{subsection}{Abstract}
+
+\begin{abstract}
+An automated grid generation package has been developed for WAVEWATCH III in MATLAB. The development of this package was motivated by the need for accurate objective obstruction grids representing unresolved islands. Previously, such grids have been created manually at great expense of man hours. The inputs to this package are a high resolution bathymetry and a separate high resolution coastline data set. The output from this package are the bathymetric grid, optional land$-$sea mask information (either as a separate file or incorporated in the bathymetric data) and the obstruction grids along the 2 main grid axes. Validation studies were carried out for 3 different regions $-$ the Caribbean, Hawaii and the French Polynesian islands. In all the cases, grids were generated at 5 different resolutions (2',4',8',15' and 30' resolutions), and a constant swell was applied along the Northern and Eastern boundaries to create steady state solutions at the different resolutions. Though there were some differences between the lower and higher resolution simulations, most of these arose from the propagation of energy through narrow gaps between islands (which cannot be resolved by the lower resolution grids). Generally the systematic patterns of energy attenuation due to sub$-$grid features were well resolved by the obstruction grids in all test cases. 
+
+This is version 2.0 of the software. The key addition in this has been the ability to develop curvilinear grids. The software does not actually develop the curvilinear coordinates themselves (there are numerous packages for those), but uses these coordinates to develop the bathymetric and obstruction grids for WAVEWATCH III      
+\end{abstract}
+
+\vfill \pagebreak
+
+%--------------------------------------------------------------%
+%            Acknowledgements                                  %
+%--------------------------------------------------------------%
+
+\addcontentsline{toc}{subsection}{Acknowledgments}
+
+{\it Acknowledgments.} The authors thank Dr. Carlos Lozano and Dr. Robert Grumbine for their input in developing the algorithms and Dr. Avichal Mehra for comments on early drafts of this manuscript. This report is available as a pdf file from 
+
+\vspace{\baselineskip} \noindent
+\centerline{http://polar.ncep.noaa.gov/waves}
+
+
+\vfill \pagebreak
+%--------------------------------------------------------------%
+%            Contents                                          %
+%--------------------------------------------------------------%
+\addcontentsline{toc}{subsection}{Table of contents}
+
+\tableofcontents
+
+\pb
+\pagestyle{empty}
+
+\bpagea
+
+
+\pb
+\pagestyle{\pstyle}
+\pagenumbering{arabic}
+%--------------------------------------------------------------%
+% Section : Introduction                                       %
+%--------------------------------------------------------------%
+\section{Introduction} \label{sec:intro}
+\newsec
+
+\noindent
+
+An automated grid generation software package has been developed for use with the wind wave model WAVEWATCH III \cite[]{tolman-02}. The aim of this software is to develop accurate obstruction grids for sub$-$grid modeling \cite[]{tol2003} as well as provide a powerful tool that will reduce the man hours necessary to generate grids for the model.  
+
+At its core the software uses two types of global data sets $-$ one is a high resolution global bathymetry (currently the choice is between using {\bf ETOPO2} -- a 2 arc-min bathymetry set and {\bf ETOPO1} -- a 1 arc-min bathymetry set) and the second is a high resolution shoreline database ({\bf GSHHS} $-$ {\bf G}lobal {\bf S}elf - consistent {\bf H}ierarchical {\bf H}igh - resolution {\bf S}horeline\footnote{available from the National Geophysical Data Center}; \citealt{wesm96}). The {\bf GSHHS} database is stored as a collection of polygons. We decided to use it to determine our coastal boundaries instead of relying only on the high resolution bathymetry to provide this information, because the boundary data set conveniently resolves the small islands, jetties and other structures that are not easily resolved. Furthermore, the coastline database provides the starting point to develop obstructions for un-resolved or poorly resolved features. In full resolution this database consists of 188606 boundaries of which 180,509 are coastal boundaries\footnote{The rest are lakes, islands in lakes and ponds in islands in lakes}. Out of these 180446 boundaries have an area less than 12400 $km^2$ (corresponding to a grid square of $1\degree \times 1\degree$ at the equator). Fig~\ref{fig:gshhs_distrib} shows a zoomed image of the cumulative distribution of these boundaries as a function of their areas (in $km^2$). 99 \% of these boundaries have an area less than 6 $km^2$. In comparison the reference global 2' grid has a resolution of $\approx 14 km^2$. Thus, most of these coastal features can only be represented as sub-grid obstructions and accounting for them manually is a prohibitive task. Having an automated grid generation software allows us to account for all of these coastal features fully and objectively. Furthermore, building multiple grids at different resolutions to take full advantage of the nesting capabilities of WAVEWATCH III becomes a fairly trivial task.     
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/gshhs_area_distrib.eps,angle=0,width=10cm}}
+\myfcap{Cumulative distribution of coastal boundaries with area less than 12,400 $km^2$ (Number of boundaries = 180446)}
+\label{fig:gshhs_distrib}
+\end{myfig}
+
+ In this report there shall be repeated references to ''grid cells''. A grid cell is defined as the area of the domain associated with a grid point (or node). All the nodes have cells associated with them and the cell boundaries for any particular node are halfway between the node and its neighbors. 
+
+The different modules of our grid generation software are
+\begin{enumerate}
+\item A {\bf grid generation module} $\rightarrow$ develops the first guess low resolution grid from the high resolution base bathymetry.
+\item A {\bf boundary module} $\rightarrow$ extracts all the boundaries from the global boundary database that lie inside the design grid, properly accounting for boundaries being split by the grid domain.
+\item A {\bf land mask module} $\rightarrow$ generates the land$-$sea mask, separating the cells into 'wet' (or active computational) and 'dry' (or inactive computational) cells, with the help of the bathymetry and boundary data\footnote{An optional module to split up large boundaries is available to speed up computations}.
+\item A {\bf wet cell  module} $\rightarrow$  groups all the wet cells that are connected together. Thus, separating the wet cells into different groups separated by the dry cells. This allows smaller water bodies to be masked out (turned inactive).
+\item A {\bf sub$-$grid module} $\rightarrow$ builds the obstruction grids for unresolved boundaries in the sub$-$grid domain. 
+\item A {\bf mask modification module}\footnote{This module is only used for WAVEWATCH III version 3.10 or higher} $\rightarrow$ modifies the final land$-$ sea mask to separate the nodes into active, inactive and boundary nodes. 
+\end{enumerate}
+
+Fig~\ref{fig:flow_chart} shows the flow chart of the package. The filled ellipses refer to data files (either reference database files that are needed as input to run the code or output files that can be used as input for WAVEWATCH III). The filled dashed circles refer to data variables, and the rectangles refer to the different modules. The package has been developed in MATLAB and consists of a series of function calls (one for each module) that can be called from a master script\footnote{An example master script will be distributed with the package}. This provides the users with the flexibility to choose which parts of the package they wish to use.  
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/flow_chart.eps,angle=0,width=10cm}}
+\myfcap{Flow Chart of the grid generation software (solid circle denotes the grid coordinate information that is obtained from the Grid module and passed to the Boundary and Sub$-$grid modules.)}
+\label{fig:flow_chart}
+\end{myfig}
+
+The code uses several reference data sets. Two of these are high resolution global bathymetry data sets (in netcdf formats), the third is a collection of global high resolution shoreline polygons (in MATLAB binary formats), and the fourth optional data set is a collection of polygons (also in MATLAB binary format) used to ``mask out'' selected bodies of water. Using the reference data and grid information provided by the user, the {\bf grid generation module} develops a design grid and stores information in the \textbf{\textit{lon}} ($x $ coordinate), \textbf {\textit{lat}} ($y $ coordinate) and \textbf{\textit{depth}} (bottom topography in $x$ and $y$ coordinates; negative below the datum) variables. The \textbf{\textit{lat}} and \textbf{\textit{lon}} variables are used to determine the grid domain and this information is used by the {\bf boundary module} to extract a subset of boundary polygons that comprise all the coastal features within the design grid domain (shown by variable \textbf{\textit{b}} in Fig~\ref{fig:flow_chart}). The boundary polygons combined with the depth information are then used by the {\bf land mask module} to develop an initial set of masks (stored in the 2D array \textbf{\textit{m}}) separating the wet computational cells from the dry cells. This initial mask information is then used by the {\bf wet cell module} to group the wet cells into different water bodies and provide the user with the option of masking out cells corresponding to water bodies that do not play a role in the computation (e.g. lakes). Finally the mask and coastal boundary information are used by the {\bf sub$-$grid module} to develop a set of obstruction grids in $x$ and $y$ directions (\textbf{\textit{Sx}} and \textbf{\textit{Sy}} variables respectively in Fig~\ref{fig:flow_chart}) for coastal features that cannot be resolved by the grid. Bathymetric and obstruction grid input files are then created for WAVEWATCH III (in one of the accepted formats) to be used for defining model domains.
+
+If the user wishes to use an independent bathymetry data set, it does not preclude him/her from using this package as long as they can either write their own program to generate the initial grid variables (\textbf{\textit{lon}}, \textbf{\textit{lat}} and \textbf{\textit{depth}}), or create their reference grid in the same netcdf format as the provided reference bathymetry data. 
+
+%\bpage
+\pb
+%--------------------------------------------------------------%
+% Section : First section                                      %
+%--------------------------------------------------------------%
+\section{MATLAB modules}
+\newsec
+
+Detailed information on the algorithms of the different modules together with the arguments with which these functions are called in MATLAB are provided in this section.
+
+\subsection{Grid generation module} \label{sc:grid}
+
+The grid generation module builds a design grid from a high resolution global bathymetric data set. Users can choose from either the {\bf ETOPO2} or the {\bf ETOPO1} grids (from NGDC). Here these grids are collectively referred to as the reference grid.
+
+Direct interpolation of bathymetry data from the higher resolution reference grid to the grid points of the lower resolution design grid is not advisable because of the possibility of aliasing. To avoid this, filtering needs to be done to remove features that cannot be resolved in the design grid. Here we use 2D averaging to remove fluctuations smaller than one grid cell. The grid module has been setup to use averaging when the design grid is of a lower resolution than the reference grids and interpolation when the design grids are of higher resolution than the reference grids. 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/grid_module.eps,angle=0,width=15cm}}
+\myfcapc{Flow chart of the grid module algorithm}
+\label{fig:grid_module}
+\end{myfig}
+
+The grid generation algorithm  ({\bf generate\_grid}) is outlined in Fig~\ref{fig:grid_module}. It determines the number of wet cells in the high resolution reference grid that lie within a single cell of the design grid. If the ratio of the total wet area (from the high resolution grid cells) to the total area exceeds a user specified cut off limit (ranging between 0 and 1), then the cell is considered wet and its depth is denoted by the average depth of all the wet cells. Otherwise, the cell is considered dry. A cut off limit is used to prevent a design grid cell from becoming wet even if there is only a single wet cell within its domain in the reference grid. This method has the advantage of maintaining a reasonable shoreline even if the design grid is much coarser than the reference grid. For higher values of the cut off limit the shoreline would be further offshore and vice versa. If the user wishes to take advantage of the coastal database to represent the shoreline then the cut off limit should be set to a very low value so that the shoreline from the bathymetry data is further inshore and then use the {\bf land mask module} described in section~\ref{sc:land_mask} to get a more accurate shoreline representation. 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/DBDB2_Bahamas_1deg_lattitude_transects.eps,angle=0,width=15cm}}
+\myfcap{Bathymetry profile as a function of longitudes across several latitude sections in the Bahamas (negative values refer to the Western Hemisphere). Circles refer to the grid locations (resolution $1^\circ$). Black line: depth computed from the averaging module. Red line: depth in the reference grid. Blue line: depth sampled from the reference bathymetry at the grid points only. (Depth below the Mean Sea Level in m)}
+\label{fig:Bahamas_bathy}
+\end{myfig}
+
+Fig~\ref{fig:Bahamas_bathy} shows cross-sectional profiles of the bathymetry in the Bahamas region as a function of the longitude at 5 different latitude sections. For comparison purposes, the bathymetry that would result from direct sampling of the reference bathymetry at grid points have also been plotted. At some locations this bathymetry will match the representative bathymetry, but at other locations it will lead to erroneous features (such as the deep trench along the $18^\circ N$ transect.).
+ 
+\subsection{Boundary module}  
+\label{sc:boundary}
+Coastal boundary information plays a crucial role in grid development, both for generating accurate land$-$sea masks and obstruction grids. We use a global database of shorelines ({\bf GSHHS} $-$ {\bf G}lobal {\bf S}elf - consistent {\bf H}ierarchical {\bf H}igh - resolution {\bf S}horeline) that provide detailed land-water interface boundaries for the entire world. The shoreline data are stored as a collection of polygons and each polygon represents a closed boundary. The points that make up a polygon are ordered in a counter clockwise orientation. The boundaries represented in the database are coastlines, lakes, islands in lakes and ponds in islands in lakes. For our purposes we are primarily interested in the coastal boundaries though for certain applications (such as Great Lakes modeling) users may be interested in other types of boundaries as well. The global shoreline data sets are available at 5 different resolutions 
+\begin{itemize}
+\item full resolution with 188606 separate polygons for the global set
+\item high resolution (0.2 km resolution) with 153539 separate polygons for the global set
+\item intermediate resolution (1km resolution) with 41523 separate polygons for the global set
+\item low resolution (5 km resolution) with 10769 separate polygons for the global set
+\item coarse resolution (25 km resolution) with 1866 separate polygons for the global set 
+\end{itemize} 
+For convenience the data sets at different resolutions have been stored as arrays of data structures in '.mat' file formats (a MATLAB binary format that can be easily loaded in MATLAB). There are separate '.mat' files for boundaries at different resolutions. 
+
+Using polygons to represent boundaries has distinct advantages.  First, the boundary data are available at a much higher resolution and do not need to be generated from the reference grid. Second, it is easy to determine the extent of the boundary in the two horizontal directions from the polygon information. Third, since these polygons are closed we can use available functions to determine if points lie inside, outside or on the polygon (MATLAB has an intrinsic function to do this). Finally, we can create additional polygons either for any boundaries that are not represented in the global data sets (such as local dikes, breakwaters etc.) or to mask out water bodies that do not play a role in the simulations (eg masking out the Mediterranean Sea for a swell propagation study in the Atlantic Ocean).
+
+The boundary module uses the global data set to obtain a sub set of boundaries that lie within the design grid domain. Accounting for boundaries that are completely inside the grid domain is trivial. However, boundaries that intersect the grid domain need to be split up and closed appropriately so that they can be used to determine land-sea masks as well as obstruction grids. A typical grid domain will intersect several boundaries as illustrated in Fig~\ref{fig:bound_sketch1}. In the figure the boundary labeled 1 lies inside the grid domain and is included as such, but all the other boundaries need to be manipulated for efficient use.
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/boundary_sketch1.eps,angle=0,width=10cm}}
+\myfcap{A typical sketch of coastal boundaries intersecting a grid domain (defined by the dashed rectangular box)}
+\label{fig:bound_sketch1}
+\end{myfig}
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/boundary_sketch2.eps,angle=0,width=10cm}}
+\myfcap{Coastal boundaries (in black) and the modified boundaries (in red) that would result if the points lying outside the grid domain in Fig~\ref{fig:bound_sketch1} are ignored}
+\label{fig:bound_sketch2}
+\end{myfig}
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/boundary_module.eps,angle=0,width=15cm}}
+\myfcapc{Flow chart of the coastal boundary module}
+\label{fig:boundary_module}
+\end{myfig}
+
+A simple algorithm which just ignores boundary points that lie outside the grid domain and adds additional points for where the boundaries intersect the grid domain will only work for boundary 3 (see Fig~\ref{fig:bound_sketch2}). For boundary 2 we need to account for the grid corner that is enclosed within the grid domain, and boundary 4 needs to be split up into two unconnected separate boundaries. An algorithm to account for this and other cases is outlined below (see Fig~\ref{fig:boundary_module} for the accompanying flow chart). We start by initializing a list that will include all the boundary polygons that lie within the grid domain and loop through the global set of boundary polygons. Each boundary polygon is then handled in the following steps     
+
+\renewcommand{\labelenumi}{Step~\theenumi:}
+\begin{enumerate}
+\item Determine if a boundary polygon lies inside or outside the grid domain. Polygons that are completely inside (added to the list) or completely outside (discarded) are easily handled. For the rest, compute the points of intersection where the polygon exits and enters the grid domain\footnote{For each point of exit there will be a corresponding point of entry}.
+\item Start a new polygon set from a point of exit and move along the grid domain in a counter - clockwise direction (adding all corners that you come across to the polygon) until the next entry point is encountered. Ignore all the points in the  original boundary polygon that lie between these two points as they lie outside the domain\footnote{If the points of intersection between the grid domain and the polygon are not part of the polygon set of points then these points are added to the new polygon set}. \label{it:1}
+\item Add all the points (in the original polygon) that lie between the entry point to the next exit point to the polygon set (since these lie inside the domain). \label{it:2}
+\item Check the exit point. If the exit point is the same that we started from then the polygon has been closed and we add it to our list of boundary polygons. At this point there are two possibilities $-$ one, that there are no more entry / exit points in the original polygon that have not been accounted for in which case we move on to the next boundary, or alternatively, there are still entry / exit points in the original polygon that are not accounted for, in which case we start a new polygon set from the next unaccounted exit point and repeat from step~\ref{it:1} for all the unaccounted points (effectively splitting a boundary into smaller polygon sets). \label{it:3}
+\item  If on the other hand the exit point in step~\ref{it:3} is not the same as the starting point then that means that the polygon cannot be closed. In which case we add the exit point to the polygon set and continue as in step~\ref{it:1}.
+\item Once all the entry / exit points in the original polygon are accounted for we move on to the next boundary polygon.   
+\end{enumerate}
+
+We now revisit the coastal boundaries shown in Fig~\ref{fig:bound_sketch1} and apply the above algorithm. Fig~\ref{fig:bound_sketch3} shows the corresponding boundary sets that are generated with the arrows indicating the path followed in developing each boundary. The exit and entry points (from the grid domain) for each boundary are labeled by the prefixes Ex and En respectively. In boundaries 2 and 3 there are only one set of exit and entry points while for boundary 4 there are two such sets. Starting with the first exit point for boundary 2 (Ex1) we move in a counter clockwise direction  along the grid domain, and adding the corner point crossed (as outlined in step~\ref{it:1}) until we reach the entry point (En1). Adding all the internal points between En1 and the next exit point, which in this case happens to be Ex1, we find that the boundary has been closed as per step~\ref{it:3}, and since all the exit / entry points have been accounted for, we move on to the next boundary. The algorithm works the same way for boundary 3, except that this time the boundary closes without crossing any corners. Boundary 4 is a little different as now there are two sets of exit / entry points. Starting from the first exit point for this boundary (Ex1) we move in the counter clockwise direction till the entry point En2 is reached. Again following step~\ref{it:3} we find that the boundary is closed, but at this point we are still left with one set of exit / entry points unaccounted for and thus a new boundary segment is created starting from exit point Ex2 and following steps~\ref{it:1} to~\ref{it:3}. Thus, boundary 4 is split up into two smaller boundaries.
+   
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/boundary_sketch3.eps,angle=0,width=10cm}}
+\myfcapc{Coastal boundaries obtained by appropriate boundary algorithm}
+\label{fig:bound_sketch3}
+\end{myfig}
+
+Before the function call to this module can be made the global boundary data have to be loaded into the MATLAB environment. Depending upon the resolution that the user wishes to work with this will be one of 5 different '.mat' files, and can be easily loaded in MATLAB. 
+
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/global_boundaries.eps,angle=0,width=15cm}}
+\myfcap{Full resolution coastal boundaries for the global domain in blue with a subset of coastal boundaries (obtained using the boundary algorithm) in black. The red box identifies the grid domain used to extract the boundaries.}
+\label{fig:global_bound}
+\end{myfig}
+
+Fig~\ref{fig:global_bound} shows a plot of the full resolution coastal boundaries together with the boundary data that lies within the domain of interest. The domain was cut through the North American continent to test the ability of the module to appropriately split up the boundaries. From the figure we can see that the boundary module works well.
+
+Two potential problem areas are the polygons that make up the Eurasian and Antarctic coast lines. These polygons wrap around because they extend around the globe. To avoid wrap around for the Eurasian coast line the polygons are defined from -50 to 400. While for the Antarctic coast the polygons were artificially closed by making the polygons go to the South Pole and across from 0 to 360. All the polygons are defined in the 0 to 360 domain and because of this it is imperative that the grids be defined in this domain. If a design grid needs to cross the 0 meridian then it is imperative that the grids be developed in two parts and then later be joined. This operation is fairly trivial in MATLAB. 
+ 
+\subsection{Land mask module}
+\label{sc:land_mask}
+
+The land mask module generates the land-sea mask. A first cut to the land-sea mask is determined from a cut-off depth in the grid. All depths above the cut-off depth are marked land (or dry) and the rest are marked sea (or wet) cells. This however, may lead to cells that are marked wet but lie inside boundary polygons either due to interpolation from reference grid or because the reference grid itself does not resolve the land features represented by the polygons. This is particularly true for some of the smaller islands in the Bahamas as well as the island chains of French Polynesia. Furthermore, using polygons provides a mechanism for masking out wet cells not needed in the computation (see discussion on user-defined polygons in section~\ref{sc:boundary}).
+ 
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/landmask_module.eps,angle=0,width=15cm}}
+\myfcapc{Flow chart of the land mask module}
+\label{fig:landmask_module}
+\end{myfig}
+
+The land mask module steps through each of the polygon boundaries, determines which of the wet cells are enclosed within the boundary and turns them into dry cells. The algorithm does not try to do the reverse (make dry cells outside boundaries into wet cells) as the wet cells also need a representative depth for computation. The algorithm proceeds as follows (see Fig~\ref{fig:landmask_module} for the flow chart). 
+ 
+\renewcommand{\labelenumi}{Step~\theenumi:}
+\begin{enumerate}
+\item Determine the cells that bound a particular polygon by using the boundary limits in the $x$ and $y$ directions
+\item Then determine all the cells that are marked wet, within this range and loop through them (this avoids having to loop through large sets of cells that are well inside a polygon).
+\item For each wet cell distribute a set of equally spaced points ($\approx 25$) over the entire cell and determine which of these points lie inside the polygon
+\item Compute the ratio of the number of points inside the polygon to the total number of points. This provides an approximate estimate of what portion of the cell lies inside the boundary. Add this to any existing value for the cell (so that we can account for multiple boundaries in a particular cell)
+\item For each cell if the total ratio exceeds a user specified cut-off value (between 0 and 1) then the wet cell is switched to dry. This approach is used so that a cell is switched to dry only if a significant portion of its area is inside a boundary.
+\end{enumerate} 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/bahamas_landmask.eps,angle=0,width=10cm}}
+\myfcap{Land-sea mask for the Caribbean domain. Red region specifies the wet cells, blue region refers to dry cells determined from a bathymetric cut off depth of 0 m, and white stars are cells that were originally wet but were turned to dry because they were inside boundary polygons (\textbf{\textit{cut\_off}} set to 0.5)}
+\label{fig:land_mask}
+\end{myfig}
+
+Fig~\ref{fig:land_mask} shows an example of the use of this algorithm for a region in the Caribbean. The grid was generated from the 2' {\bf ETOPO2} reference grid at a resolution of 4'. The white stars in the figure denote the additional wet cells that are switched to dry because they lie inside boundary polygons. This routine accounts for cells that are close to the coastline which were marked as wet cells because of grid resolutions but should be dry because they lie within a land boundary, as well as coastal features that may not be well resolved in the reference grids but are well resolved as coastal boundary polygons. 
+
+Having the list of boundary polygons as an argument to the function provides considerable flexibility while developing the land-sea mask. The set of boundary polygons \textbf{\textit{b}} can also contain a list of user-defined polygons which will automatically switch all the wet cells that the user wishes to mask out to dry cells. This provides a convenient way to mask out cells where energy will not propagate (e.g. Lagoons, reefs, harbors etc.). Alternatively, for some cases it may not be desirable to switch cells enclosed within boundaries to dry cells (e.g. inundation studies) in which case those polygons can be dropped from the list that is passed to the function.
+
+\subsubsection{Split boundary module}
+
+When the number of points defining a boundary polygon becomes significantly large the subroutine to determine points that lie inside/outside the polygon becomes computationally very intensive, making the land mask module very slow\footnote{This is an issue with most high resolution boundary polygons}. To avoid this problem, a splitting module is used that splits up the larger boundary polygons into smaller polygons. 
+
+Though using this module is not necessary for obtaining the land mask, it is advisable to do so, specially when using the full resolution polygon data set. Rule of thumb is to set the tolerance limit to be at least 4 or 5 times the grid resolution with the minimum value being at least $2\degree$. This prevents too much splitting of the polygons and at the same time provides a significant speed up in the land-sea mask computation\footnote{The split boundary polygons are only used for determining the land - sea mask. The rest of the modules use the boundary polygons from the boundary module}.
+
+\subsection{Wet cell module}
+\label{sc:wet_cell}
+A grid in many cases includes several unconnected water bodies, some of these, particularly those consisting of a few cells, should be removed from the grid. The wet cell module is designed to group the wet cells into independent water bodies. Once the water bodies are identified the user can then decide which to include in the grid. The algorithm is outlined below as well as in the flow chart of Fig~\ref{fig:wetcell_module}
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/wetcell_module.eps,angle=0,width=15cm}}
+\myfcapc{Flow chart of the wet cell module}
+\label{fig:wetcell_module}
+\end{myfig}
+
+\renewcommand{\labelenumi}{Step~\theenumi:}
+\begin{enumerate}
+\item Start from the first wet cell (obtained from the land mask 2D array \textbf{\textit{m2}} in section~\ref{sc:land_mask}) and mark it with a unique flag value
+\item Check its neighbors (neighbors are defined as cells to the left, right, up and down, but not diagonal) to see if they are wet, mark with the same flag and add to a list. \label{wetcell_it:2}
+\item Go through each cell in the list and repeat step~\ref{wetcell_it:2}.
+\item Keep doing this until no new wet cell neighbor is found. \label{wetcell_it:3}
+\item Go to the next unmarked wet cell and set it to a new flag value. Repeat steps~\ref{wetcell_it:2} to~\ref{wetcell_it:3} till no new wet cell neighbor is found.
+\item Keep repeating until no unmarked wet cell remains.      
+\end{enumerate} 
+
+\begin{myfig}{tbp}
+\subfigure[{\it land sea mask}]{\psfig{file=images/pacific_landmask.eps,angle=0,width=7.5cm}}
+\subfigure[{\it Water bodies with flag ids}]{\psfig{file=images/pacific_waterbodies.eps,angle=0,width=7.5cm}}
+\myfcap{Land sea mask and wet cell flags for a 1$^\circ$ resolution Pacific ocean grid} 
+\label{fig:wet_cell}
+\end{myfig}
+
+Fig~\ref{fig:wet_cell} shows an example of the use of this module. In this example a 1$^\circ$ resolution grid for the Pacific Ocean has been created which also includes parts of the Gulf of Mexico and Hudson Bay. The left hand side is a plot of the original land-sea mask that does not separate out the different water bodies. The right hand side is a plot of the variable \textbf{\textit {mask\_map}} obtained from the land-sea mask. In this case, we get 6 independent water bodies $-$ the Pacific Ocean (ID = 1), the Strait of Juan de Fuca (ID = 2), part of the Gulf of California (ID = 3), both of which are seen here as internal lakes because of poor grid resolution, as well as the Gulf of Mexico (ID = 4), Hudson Bay (ID = 5) and a part of the Atlantic Ocean (ID = 6). Technically these are all water bodies, but depending upon the application only a few of these are relevant. The land-sea mask is modified by the value of \textbf{\textit {tol}} which the user sets depending upon the operation in mind. For example, if the user wishes to use the grid for swell propagation in the Pacific Ocean only, then all the smaller water bodies are not needed and the user can choose a negative \textbf{\textit{tol}} value to mask them all out. However, if the grid is nested into a larger global grid and the user is interested in swell dynamics for both the Pacific Ocean and the Gulf of Mexico, then the user would choose a positive \textbf{\textit {tol}} value to mask out only the smaller water bodies. Keep in mind that setting \textbf {\textit {tol}} to 0 will still create the appropriate \textbf{\textit {mask\_map}} but lead to no operation on the land-sea mask and \textbf {\textit {m3}} will be the same as \textbf{\textit{m2}}. 
+
+More often than not the user wants specific water bodies masked out and is not sure what the right value for \textbf{\textit{tol}} should be to achieve this. Since the wet cell module recursively searches all wet cells for matching neighbors and can be a computationally intensive algorithm, it is not ideal to keep iterating through this routine until the correct value is specified. Alternatively, \textbf{\textit{mask\_map}} can be used to modify the land-sea mask interactively. Taking the previous example, if the user is interested in keeping the Pacific Ocean and the Gulf of Mexico he could proceed by masking out all the smaller water bodies with the command
+\begin{alltt}
+>> [\textbf{\textit{m3,mask\_map}}] = \textbf{remove\_lake}(\textbf{\textit{m2,-1,0})};
+\end{alltt}
+ which would dry out all the water bodies except the largest one (in this case the Pacific Ocean). Then from a plot of \textbf{\textit{mask\_map}} (see right side plot in Fig~\ref{fig:wet_cell}) the user could identify the wet cells that make up the Gulf of Mexico (flag id 4) and switch these cells in \textbf{\textit{m3}} from dry back to wet in with the following set of commands
+\begin{alltt} 
+>> \textbf{\textit{loc}} = \textbf{find}(\textbf{\textit{mask\_map}} == 4);
+>> \textbf{\textit{m3}}(\textbf{\textit{loc}}) = 1;
+\end{alltt}
+where all the elements (cells) of the 2D array \textbf{\textit{mask\_map}} that are equal to 4 are identified and these cells which had been turned from wet to dry in \textbf{\textit{m3}} are reverted back to wet.
+
+\subsection{Sub-grid module}
+\label{sc:sub_grid}
+
+The Sub-grid module makes up the final part of our grid generation package for WAVEWATCH III. \cite{tol2003} introduced obstruction grids to block swells propagating through regions with unresolved islands. Going back to the example for the Caribbean region (Fig~\ref{fig:land_mask}) and adding the coastal boundaries to this plot (Fig~\ref{fig:land_mask_bound}) shows that even for a high resolution grid (4') a large number of coastal features are either poorly or not represented by the land-sea mask. Hence, the need for obstruction grids to properly account for swell propagation through this region. Considering the extent of coastal features that would have to be accounted for this would be an arduous manual task which would benefit from automation.
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/bahamas_landmask_withboundary.eps,angle=0,width=10cm}}
+\myfcap{Land mask for the Caribbean in Fig~\ref{fig:land_mask} with the coastal boundary polygons in black added on}
+\label{fig:land_mask_bound}
+\end{myfig}
+
+As specified in \cite{tol2003} obstruction grids are necessary for both grid axes. These obstruction grids are generated at the same points as the bathymetric grid and represent the amount of energy being blocked in the cells corresponding to the grid points. A value of 0 represents no obstruction and a value of 1 complete obstruction. Fig~\ref{fig:subgrid1} shows a sketch of how a sub-grid obstruction is computed. Along the $x$ direction, the obstruction is determined by how much of the cell height is blocked by the island (shown by the vertical double arrow line) and along the $y$ direction the obstruction is determined by how much of the cell width is blocked by the island (shown by the horizontal double arrow line). Obstruction grid values for dry cells are kept at 0 and non-zero values are only generated for wet cells with unresolved boundaries in them. To prevent spurious attenuation of swell traveling into the coast, obstruction values for cells next to dry cells are also set to zero. Thus, if a particular cell is flagged as a dry cell then in the $x$ direction obstruction grid (hereafter represented by the variable \textbf{\textit{Sx}}) cells to the left and right of the dry cell will be set to 0 and in the $y$ direction obstruction grid (hereafter represented by the variable \textbf{\textit{Sy}}) cells above and below the dry cell are set to 0. 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid1.eps,angle=0,width=10cm}}
+\myfcap{Representation of an island as a sub-grid obstruction. Solid circle represents the grid points where the obstruction sets are calculated, dashed lines represent the corresponding cells}
+\label{fig:subgrid1}
+\end{myfig}
+ 
+There are several complications in constructing obstruction grids \cite[Fig 1]{tol2003}.(i) What should be done with boundaries that overlap two or more cells (but are still not resolved by the grid).(ii) How do we account for multiple boundaries in a cell.(iii) Do we take the effect of neighbors into account while building the obstruction grid sets and how. These points will be considered separately below. 
+
+%\renewcommand{\thesubsubsection}{(\alph{subsubsection})}
+
+\subsubsection*{(a) Boundaries overlapping cells}
+When boundaries overlap cells then there are potential problems in determining obstruction data sets. For \textbf{\textit{Sx}} the problems occur when the overlaps are over cells in the same row and for \textbf{\textit{Sy}} the problems occur when the overlaps are over cells in the same column (see Fig~\ref{fig:subgrid2}). In the figure there are two boundaries that cover multiple cells. Boundary 1 overlaps cells {\bf B}, {\bf C} and {\bf F}, while boundary 2 overlaps cells {\bf E} and {\bf H}. From the orientation of boundary 1 we can see that wave energy propagating in the $x$ direction  from cell {\bf A} to cell {\bf C} should be completely blocked. However, if \textbf{\textit{Sx}} values for cell {\bf B} and cell {\bf C} are to be determined based only on the proportion of the boundary found inside each cell then only partial blocking in each cell will take place. Alternatively, since the same boundary segment occurs in both the cells, we could move the segment from one cell to the other and use that to compute the obstruction grids. This will lead to complete blocking in one grid and no blocking in the other. Since our aim is to model the correct amount of sub-grid energy at the resolution of the coarse grid, moving the segment from one cell to the other is acceptable. For convenience, we move the segments to the cell with the larger boundary segment. The argument does not extend to \textbf{\textit{Sx}} computations in cell {\bf F} as the obstruction there occurs at a different row, and is not affected by the obstructions in cells {\bf B} and {\bf C} (at least at the local level). The same argument also holds for \textbf{\textit{Sy}} computations in cells {\bf E} and {\bf H} with respect to boundary 2\footnote{Moving obstructions to a single cell also avoids ``double counting'' as identified in Fig 1 of \cite{tol2003}}. 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid2.eps,angle=0,width=10cm}}
+\myfcapc{Sub-grid obstructions for boundaries overlapping multiple cells}
+\label{fig:subgrid2}
+\end{myfig}
+ 
+\subsubsection*{(b) Boundaries in the shadow zone}
+%\label{scs:bound}
+Consider a single cell with multiple boundaries (Fig~\ref{fig:subgrid3}). If we were to compute \textbf{\textit{Sx}} and \textbf{\textit{Sy}} values by adding up all the heights and widths of the boundaries, they would exceed the height and width of the cell respectively leading to full obstruction. However, a closer inspection of the boundaries show that for calculating \textbf{\textit{Sx}}, boundaries 3 and 4 lie in the shadow zone of boundary 1 and should have no role in determining the obstruction segments, while only a part of boundary 2 should play a role in determining the obstruction segments. Similarly for \textbf{\textit{Sy}} boundary 2 should play no role and only parts of boundaries 1, 3 and 4 should be used in determining the actual obstruction segment(s). Thus, in any particular direction a net obstruction segment needs to be generated which removes segments that are completely overlapped and joins segments that are only partially overlapped, resulting in net segments shown by the double arrow lines in Fig~\ref{fig:subgrid3}. This provides a more accurate representation of the obstruction process.
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid3.eps,angle=0,width=10cm}}
+\myfcap{Multiple boundaries and the resulting net obstruction segments along the 2 directions in a single cell}
+\label{fig:subgrid3}
+\end{myfig}
+ 
+\subsubsection*{(c) Accounting for neighboring cells}
+A final factor to consider in building the obstruction grids are the orientations of the boundaries in neighboring cells. Since obstruction grids only compute the attenuation of energy due to sub-grid blocking, and not where in the cell this blocking occurs, the orientation of boundaries in neighboring cells will have to be accounted for in the building of the obstruction grids if this process needs to be reproduced at some level. We can illustrate this with an example for computing \textbf{\textit{Sx}} grid along a row segment as shown in Fig~\ref{fig:subgrid4} (Similar arguments will hold for \textbf{\textit{Sy}} grid along a column segment). If the obstruction grid was computed for each cell without taking into account the boundaries in the neighboring cells then \textbf{\textit{Sx}} values for cells {\bf A} and {\bf B} in the figure would be approximately 0.5. However the boundaries are oriented in such a manner that blocking in cell {\bf A} occurs in the center while blocking in cell {\bf B} occurs along the sides. Thus, as the waves propagate through the cells most of the wave energy should get blocked, and the obstruction values should be higher. Alternatively, if the islands in cell {\bf B} lie in the shadow of the island in cell {\bf A} then no obstruction should occur in cell {\bf B}. We can take these effects into account by including the boundary segments of the neighboring cells when building the net segments. 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid4.eps,angle=0,width=10cm}}
+\myfcapc{Orientation of boundaries in neighboring cells}
+\label{fig:subgrid4}
+\end{myfig}
+ 
+If obstruction grids are to be built by taking obstructions in neighboring cells into account then a few questions arise. How many neighboring cells should be taken into account ? Should preference be shown to one direction or the other ? Since we are trying to best simulate local processes, we shall limit our checking to only the immediate neighbors. This also has the added advantage of keeping our algorithm relatively simple. Considering obstructions in adjacent cells is particularly important to assure full blocking of distributed islands. Considering more than directly adjacent cells is inconsistent with the resulting grids.
+
+Fig~\ref{fig:subgrid5} illustrates the computation of \textbf{\textit{Sx}} along a row of cells. First consider using both neighbors\footnote{Note that the obstructions considered here are computed with the previously discussed algorithm but by considering the expanded area covered by multiple cells}. In this case contributions for cell {\bf A} to \textbf{\textit{Sx}} come from cell {\bf B}, for cell {\bf B} from cells {\bf B} and {\bf C}, for cell {\bf C} also from cells {\bf B} and {\bf C} (cell {\bf D} boundary lies in the shadow of cell {\bf B}), for cell {\bf D} the contribution comes from cell {\bf C} and for cell {\bf E} contribution comes from cell {\bf D}. We can identify over-obstruction in several cases. First, cells {\bf E} and {\bf A} contain no obstructions and thus should have \textbf{\textit{Sx}}$=0$. However, because of information from neighboring cells, non-zero values are being registered for these cells. This is easily fixed by ensuring that obstruction values are only assigned if the cell in question is contributing to the obstruction of wave energy. Then the \textbf{\textit{Sx}} values  in cells {\bf A} and {\bf E} (because of no boundaries) as well as cell {\bf D} (because the boundary lies in a shadow zone of neighboring cells) would be set to 0. This however does not completely remove the over obstruction. For energy propagating from left to right, the effects of cells {\bf B} and {\bf C} would be felt both in cell {\bf B} as well as cell {\bf C}. 
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid5.eps,angle=0,width=10cm}}
+\myfcap{Using neighboring cell boundary information for computing \textbf{\textit {Sx}}}
+\label{fig:subgrid5}
+\end{myfig}
+
+On the other hand we can intentionally introduce directional bias in our \textbf{\textit{Sx}} computations by taking only neighbors from one side into account. So we build two sets of \textbf{\textit{Sx}} grids, one which is built taking account of neighbors on the left and the other taking into account neighbors on the right. In the case of the example looking to the left only, the contribution to cell {\bf B} will come from {\bf B} itself, for cell {\bf C} from {\bf B} and {\bf C} and so on. For waves propagating from left to right this creates an obstruction data set with no over obstruction. If on the other hand we take neighbors on the right hand side to compute the \textbf{\textit{Sx}} grid then, contribution to cell {\bf C} would now come from {\bf C} itself (since cell {\bf D} is in the shadow of cell {\bf C}), and for cell {\bf B} from cells {\bf B} and {\bf C} and so on. Again for waves propagating from right to left this set of obstruction values would not lead to over obstruction. Thus, the advantage of having directionally biased obstruction values would be that over obstruction would not be an issue. However, the disadvantage would be that now you would have two sets of \textbf{\textit{Sx}} grids and the choice of grid would depend upon the direction of wave propagation\footnote{Note that WW-III already uses directionally dependent obstructions internally \cite[]{tol2003}. Adding directionally dependent grids would be relatively straightforward}. We shall use numerical experiments in section~\ref{sc:num_exp} to explore the impact of building obstruction grids with neighboring cells on the energy attenuation of propagating swells.  
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid_module_1.eps,angle=0,width=15cm}}
+\myfcap{PART 1 of the flow chart of the sub$-$grid module algorithm (outlines the steps~\ref{it_obg:1} to~\ref{it_obg:3} of the algorithm)}
+\label{fig:subgrid_module_1}
+\end{myfig}
+
+\begin{myfig}{tbp}
+\centerline{\psfig{file=images/subgrid_module_2.eps,angle=0,width=15cm}}
+\myfcap{PART 2 of the flow chart of the sub$-$grid module algorithm (this is a continuation of the flow chart from Fig~\ref{fig:subgrid_module_1} and outlines the steps~\ref{it_obg:4} and~\ref{it_obg:5} of the algorithm)}
+\label{fig:subgrid_module_2}
+\end{myfig}
+
+Based on the considerations outlined above, the algorithm for building sub-grid obstructions proceeds as shown in the following steps as well as in the flow diagrams in Figs~\ref{fig:subgrid_module_1} and~\ref{fig:subgrid_module_2} (the flow chart was too big to fit in one figure and was thus split into two).
+ 
+\renewcommand{\labelenumi}{Step~\theenumi:}
+\begin{enumerate}
+\item Loop through all the boundaries and for each boundary determine all the cells that the boundary passes through. For each wet cell (this automatically discards all cells that are enclosed by boundaries) determine the North, South, East and West limits of the boundary in that cell. At the end of this loop the information available for each cell are the number of boundaries that are fully / partially enclosed in the cell, and for each boundary their upper and lower limits in the 2 directions.\label{it_obg:1}
+\item Now loop through all the cells and for each cell that is wet and has boundaries, compare with neighboring cells (for $x$ direction we compare with the cell to the right and for the $y$ direction we compare with the cell above) to check if they share common boundaries. If yes, then move the boundary segment from the cell that has a smaller portion to the cell that has a larger portion so that the obstruction effect from a particular feature occurs over one cell. This prevents double counting of the same coastal feature in neighboring cells\footnote{We are only concerned with cells in the same row for $x$ direction and cells in the same column for $y$ direction. If a coastal feature is distributed over more than two cells and still shows up as a sub-grid obstruction then we let the obstruction effect be split over the different cells}. \label{it_obg:2}
+\item Now that overlapping boundaries have been moved to one grid or the other, once again loop through the cells and determine the net segments in both $x$ and $y$ directions for each cell, removing boundary segments that are in the shadow zone of another boundary segment and joining segments that overlap. \label{it_obg:3}
+\item Now loop through the cells to build the obstruction grids. As outlined above there are three ways that this can be done $-$ only account for boundary segments in the cell, account for boundary segments in both neighboring cells (left and right for $x$ direction and above and below for $y$ direction), or account for boundary segments in only one neighboring cell. All three options are provided in the algorithm. If neighboring cell information is to be accounted for then the segments of the neighboring cells are compared with the segments in the cell just like in step~\ref{it_obg:3} and a set of non overlapping boundary segments determined. If during the determination of the non overlapping segments, all the boundary segments in the cell under consideration are removed (because they lie in the shadows of the boundary segments in the neighboring cells) then obstruction for that cell is set to zero (since the boundary segments of the cell are not contributing to the obstruction of the energy). If on the other hand there are unique boundary segments in the cell then the obstruction values (\textbf{\textit{Sx}} and \textbf{\textit{Sy}}) for the cell are computed using the following formulas
+\[ Sx = \frac{\sum h_{seg}}{h_{cell}} \] and \[ Sy = \frac{\sum w_{seg}}{w_{cell}} \]
+where, $h_{seg}$ are the heights of the individual non-overlapping boundary segments, $h_{cell}$ is the height of the cell, $w_{seg}$ are the widths of the individual non overlapping boundary segments and $w_{cell}$ is the width of the cell. \label{it_obg:4}
+\item The final step in the obstruction grid computation is to check the neighbors of the cells with non-zero obstruction values. If either of these neighbors are dry cells the obstruction along that direction is set to zero. \label{it_obg:5} 
+\end{enumerate}
+
+The algorithm described above was developed for rectilinear grids. It has been adapted for curvilinear grids as well by locally rotating the cell about its lower left vertex. The angle of the cell is determined by the coordinates of its corners.
+
+\subsection {Mask modification module}
+
+This module is needed only when working with WAVEWATCH III version 3.10 or higher. From version 3 onwards WAVEWATCH III has become a multi - grid model which uses nested grids with with two way nesting \cite[]{tolman-2006}. The land - sea mask and obstruction grids for the multi-grid model are built in the same manner as the earlier versions. However, some modifications to the land-sea mask are needed to take full advantage of added capabilities\footnote{Only grids that get boundary data from another ``upper level'' or ``parent'' grid need to be modified}. For computational efficiency, coupling between nested grids is not limited to the edges of the grids. Fig~\ref{fig:ec_lm} illustrates the differences between the land-sea masks for the older and new versions of WAVEWATCH III. This grid was generated for high resolution simulations along the United States Gulf and East coasts, and is nested inside a larger regional 10' grid (which is further nested inside a global 30' grid). The left hand panel shows the land - sea masks for version 2.22 of WAVEWATCH III. This mask was generated using the algorithms described in this report. However, the high resolution grid is needed only up to a certain distance offshore ($\approx$ 60 nautical miles), making a significant number of computational points unnecessary. In version 3.10 of WAVEWATCH III, the computational points that are not needed in the calculation can be switched off and the right hand panel in Fig~\ref{fig:ec_lm} shows the land-sea mask for this model. Instead of 2 the mask now has 4 values $-$ 0 for land, 1 for water, 2 for boundary nodes\footnote{Boundary conditions from the parent grid (in this case the regional 10' grid) are applied at these nodes} and 3 for nodes that are ignored in the computation.   
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it Land-Sea Mask for version 2.22}]{\psfig{file=images/ec_lm_orig.eps,angle=0,width=7.25cm}}
+\subfigure[{\it Land-Sea Mask for version 3.10 and higher}]{\psfig{file=images/ec_lm_final.eps,angle=0,width=7.25cm}}
+\myfcap{Land-Sea Masks for a 4' US East Coast grid. This grid is nested inside a larger 10' grid.}
+\label{fig:ec_lm}
+\end{myfig}
+
+The mask modification module is used to modify the mask for WAVEWATCH III version 3.10. The algorithm proceeds as follows
+\renewcommand{\labelenumi}{Step~\theenumi:}
+\begin{enumerate}
+\item Using the polygon and grid information the nodes are separated into those that lie outside the polygon, on the polygon and inside the polygon.
+\item All the points that lie outside the polygon are flagged with the value 3 while all the wet points that lie on the polygon are flagged with the value 2\footnote{Dry points do not provide any boundary data to the grid and are hence ignored}.
+\item For each row the algorithm proceeds down the columns till the flag changes from 3 to 1 or vice versa. It then checks the neighborhood of points to determine which cell has the largest segment of the polygon passing through it. That cell is where the boundary condition is to be applied and it is flagged with a value of 2.
+\item The above step is repeated for all the columns.
+\item Finally the edges of the grid are checked to see if they lie inside the polygon. Those edges that are inside the polygon and are wet have their flag value switched to 2.
+\item Once all the boundary points have been assigned, the algorithm checks to make sure that a boundary condition can be prescribed at each of these points from the parent grid. To do so it compares the boundary point with corresponding neighbor points in the parent grid. If enough wet points\footnote{For coinciding points this corresponds to 1, for 1 coinciding axis it corresponds to 2, otherwise it corresponds to 4} from that grid are found so that a reliable boundary condition can be obtained then the flag value remains unchanged. Otherwise the flag value is changed to 3.  
+\end{enumerate}
+
+\bpage
+\pb
+
+\section {Numerical test cases}
+\label{sc:num_exp}
+\newsec
+To determine how well the obstruction grids attenuate wave energy, we conducted a series of swell propagation studies in 3 different regions $-$ the Caribbean, Hawaii and French Polynesia.  
+
+Our design experiment consisted of a constant swell propagating from the North West at an angle of $45^\circ$ with a significant wave height of 4 m. The swell is monochromatic with a peak frequency of 0.1 Hz. The frequency spectrum is discretized by 3 components with the middle frequency at 0.1 Hz. The directional spectrum is of the cos type with a power of 8, yielding a directional spread of $\pm 30^\circ$ about the swell propagation direction. Discretization of the directional spectrum has a significant impact on the development of the ``garden sprinkler effect'' \cite[]{boho-1987} and is discussed in some detail in section~\ref{sc:num_carib}. The spatial spreads of the swell were made large enough that nearly constant swell boundary conditions could be applied. These are prescribed along the Northern and Eastern boundaries. In all the cases the runs were continued until steady state conditions were reached. 
+
+For each test case simulations were carried out at 5 different resolutions (2',4',8',15' and 30'), both with and without obstruction grids. The corresponding global time steps for the different grid resolutions were 300, 600, 1200, 1800 and 1800 sec respectively. Refraction effects were switched off in the model runs to eliminate cumulative differences associated with bathymetry representation at the different grid resolutions. Simulations at the highest (2') resolution were generally used as ground truth. Since this is a test of energy propagation only significant wave heights were compared. When comparing results at two different resolutions, the results were averaged over all the cells in the higher resolution grid that lie inside the cells of the lower resolution grid, so that differences can be assessed directly.
+
+A point raised while building the obstruction grid algorithm in section~\ref{sc:sub_grid} was the possibility of over obstruction when accounting for coastal features of neighboring cells. Alternative suggested methods were to only account for obstructions in individual cells or to consider only the neighbor in the path of the swell. For the test cases considered here where a constant swell is propagating in from the North - West, the correct choice would be to use the neighbor to the right (up) in $x$ ($y$) direction. The three different ways to build the obstruction grids $-$ not accounting for obstructions in neighboring cells (hereby referred to as Test OB-0), accounting for obstructions in both neighboring cells (hereby referred to as Test OB-2) and accounting for obstruction in only one neighboring cell (hereby referred to as Test OB-1) $-$ will be compared with the impact of not taking any obstructions into account (hereby referred to as Test NO-OB).  
+
+\subsection{Caribbean}
+\label{sc:num_carib}
+
+The Caribbean region with the small islands of the Bahamas and Lesser Antilles provide a good test case for our grid generation package, in particular the obstruction algorithm. Fig~\ref{fig:bahamas_grid} shows how well the coast lines are represented in the different grids in relation to the {\bf GSHHS} database. From the figure we can see that even the 2' resolution grid cannot reproduce all the islands in the Bahamas (particularly in the North) and some of the Lesser Antilles islands in the west ($10\degree N - 16\degree N$ and $65\degree W - 60\degree W$). As the resolution decreases, this representation gets worse, for the 8' resolution most of the obstruction effects by the islands of the Bahamas and the Lesser Antilles on the swell propagation can only be modeled using obstruction grids.  
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it GSHHS polygons}]{\psfig{file=images/Bahamas_basecont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 2' grid}]{\psfig{file=images/Bahamas_2mincont.eps,angle=0,width=7.25cm}}\\
+\subfigure[{\it 4' grid}]{\psfig{file=images/Bahamas_4mincont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/Bahamas_8mincont.eps,angle=0,width=7.25cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/Bahamas_15mincont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/Bahamas_30mincont.eps,angle=0,width=7.25cm}}
+\myfcap{Land masks for the Caribbean test case. Fixed boundary conditions of a swell ($H_s = 4 m$) propagating from the North West applied along the $30 \degree$  N and $55 \degree$ W boundaries.} 
+\label{fig:bahamas_grid}
+\end{myfig}
+
+\subsubsection*{Garden Sprinkler Effect}
+
+Due to the discretized representation of the ocean spectrum in spectral wave models, spatial spreading of the spectrum occurs along discrete bands leading to what is known as the ``garden sprinkler effect''(GSE). If the discretization is too coarse, continuous dispersion disintegrates into discrete wave fields. This becomes particularly visible behind islands and obstacles. Since our test cases consist of a monochromatic wave component in frequency, GSE effects arise primarily from the discretization of the directional spectrum. To avoid GSE effects the resolution should be such that the spreading (after the swell has crossed through the domain) should not be larger than the mesh size \cite[]{boho-1987}. This leads to a limit on the directional resolution \[ \Delta \theta < 1/N, \]where $N$ is the distance across the ocean in the number of meshes. For a given spectral resolution the greatest GSE effects will be observed in the grid with the finest resolution. For the test cases here, the 2' grid is the finest grid with $N = 751$. This leads to a directional resolution of $\Delta \theta \approx 0.075 \degree$. Clearly GSE effects cannot be avoided here and they can have a significant impact on the wave field (Fig~\ref{fig:bahamas_2min_gse} \subref{fig:bahamas_2min_gse1}).  
+
+There are two alternative GSE alleviation methods available in WAVEWATCH III\footnote{A third method is currently under development}. \cite{boho-1987} considered the wave action equation\footnote{Governing equation for $3^{rd}$ generation wind wave models} for spectral bands (as opposed to spectral components) and developed an alternative spatial propagation scheme that introduced diffusive correction to account for continuous dispersion of the spectrum. Though the technique is very adept at alleviating GSE, numerical stability requirements of this scheme put a limit on the size of $\Delta t$ \cite[]{tol2002}. This is particularly true for the very high resolution runs where computational times can increase by greater than 75 \%. This approach is not viable with the very high resolution grids that we are working with. An alternative approach suggested by \cite{tol2002} applies a local average, with the averaging box directly proportional to the product of a tunable parameter $\gamma$ and the time step $\Delta t$. Default value for $\gamma$ in WAVEWATCH III is 1.5 and \cite{tol2002} has shown that this approach yields virtually identical results as \cite{boho-1987}. The averaging approach also does not add any additional stability constraints on the time step. However, the averaging area is related to the time step $\Delta t$ and therefore, the extent of GSE alleviation would be related to grid resolution, with the highest grid resolution having the least alleviation (Fig~\ref{fig:bahamas_2min_gse} \subref{fig:bahamas_2min_gse2}). Increasing the tunable parameter $\gamma$ so that all the different grid resolutions have the same averaging area does not work because in the 2' grid this leads to $\gamma = 12$, which for the given spectral resolution exceeds the grid resolution\footnote{WAVEWATCH III currently limits the size of the averaging area to the mesh size \cite[]{tol2002}} (Fig~\ref{fig:bahamas_2min_gse} \subref{fig:bahamas_2min_gse3}). 
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it Without any GSE alleviation and }$\Delta \theta = 15 \degree$]{
+\label{fig:bahamas_2min_gse1}
+\psfig{file=images/bahamas/gs_runs/ATLBAH_2min_noobstr.eps,angle=0,width=7.5cm}}    
+\subfigure[{\it GSE alleviation with } $\gamma=1.5, \Delta \theta = 15 \degree$]{\label{fig:bahamas_2min_gse2}
+\psfig{file=images/bahamas/newc/ATLBAH_2min_noobstr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it GSE alleviation with } $\gamma=12, \Delta \theta = 15 \degree$]{\label{fig:bahamas_2min_gse3}
+\psfig{file=images/bahamas/gs_runs2/ATLBAH_2min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it Without any GSE alleviation and } $\Delta \theta = 2 \degree$]{
+\label{fig:bahamas_2min_gse4}
+\psfig{file=images/bahamas/gs_runs4/ATLBAH_2min_noobstr.eps,angle=0,width=7.5cm}}
+\myfcap{GSE alleviation in the 2' grid using alternative approaches. Significant wave heights have been normalized by the design spectrum height of $H_s = 4 m$}
+\label{fig:bahamas_2min_gse}
+\end{myfig}
+
+Even if spectral resolution $\Delta \theta$ was changed so that the averaging box is not limited by mesh size, keeping the averaging area unchanged across different grid resolutions does not imply that the same level of GSE alleviation is applied in the different grids because the averaging is done more often in the higher resolution grid (smaller time step). Since our aim is to determine the impact of obstruction grids in blocking swells, we want to avoid introducing additional differences from different levels of GSE alleviation in different grids. Keeping that in mind GSE alleviation in the runs was turned off and the grid resolution $\Delta \theta$ was increased to $2\degree$. Even though this is not enough to completely remove GSE, it does limit its influence (Fig~\ref{fig:bahamas_2min_gse} \subref{fig:bahamas_2min_gse4}).
+ 
+\subsubsection*{Obstruction results}
+
+To assess how well the obstruction algorithm works, we need to have a ground truth solution. A high resolution run where the obstruction grid does not play a significant role would be the ideal ground truth. Fig~\ref{fig:bahamas_2min} compares the wave height distribution with and without the obstruction for the 2' grid. As can be seen, even at this high resolution the obstruction grid does play a role in suppressing the wave field, particularly behind the Lesser Antilles. However the differences are less than 10 \% and we will use the 2' grid resolution run as our ground truth \footnote{When comparing the different scenarios (NO-OB, OB-0, OB-1 or OB-2) the highest resolution grid corresponding to that scenario will be taken as the ground truth}. Note the clear GSE patterns around $10\degree N-15\degree N$ and $85\degree W-80\degree W$ from swell energy propagating through the Lesser Antilles. 
+ 
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it Test NO-OB}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_2min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it Test OB-2}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_2min_obstr1.eps,angle=0,width=7.5cm}}\\
+\begin{center}
+\subfigure[{\it Difference between the two (with obstruction - no obstruction)}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob1v2mnnoob.eps,angle=0,width=7.5cm}}
+\end{center}
+\myfcapc{Normalized Significant wave heights for 2' grid}
+\label{fig:bahamas_2min}
+\end{myfig}
+
+The increasing importance of the obstruction grids at lower resolutions can be seen by comparing swell propagation without obstruction (Fig~\ref{fig:bahamas_noobstr}) and with obstruction (Fig~\ref{fig:bahamas_obstr}) to the swell propagation in the high resolution run in Fig~\ref{fig:bahamas_2min}. Without obstruction grids we see that even at the 8' resolution a significant portion of the energy propagates through the Bahamas and Lesser Antilles islands, because these islands are all but invisible to the lower resolution grids. Including the obstruction grids re-introduces the blocking effects from the island chains, particularly for the lower resolution grids where the islands are not resolved at all.
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_4min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_8min_noobstr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_15min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_30min_noobstr.eps,angle=0,width=7.5cm}}
+\myfcapc{Normalized Significant wave heights for Test NO-OB}
+\label{fig:bahamas_noobstr}
+\end{myfig}
+
+The differences between the 2' resolution solution and the lower resolution solutions with and without obstruction grids are shown in Figs~\ref{fig:bahamas_comp_obstr} and~\ref{fig:bahamas_comp_noobstr} respectively. In the absence of obstruction grids wave height is consistently over predicted by more than 50 \% of the incident wave height behind the island chains, because of the inability of the grids to resolve the islands. Including sub-grid obstruction effects largely corrects this, and differences between the lower resolution and high resolution runs reduces to less than 10 \% over most parts of the domain and are mostly localized near the obstructions. After including obstruction, the main causes for differences between low resolution and high resolution runs are due to $-$ (a) representation of headlands and gaps in different grids are different, (b) shoaling effects in shallow waters will be different due to differences in bathymetric representation (refraction processes have been switched off and do not play a role here) and (c) limitations of the obstruction algorithm. The differences between runs (with blocking) are significantly smaller than the removed ``first order'' effects of lack of blocking of swell propagation, and are therefore acceptable.
+   
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_4min_obstr1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_8min_obstr1.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_15min_obstr1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAH_30min_obstr1.eps,angle=0,width=7.5cm}}
+\myfcapc{Normalized Significant wave heights for Test OB-2}
+\label{fig:bahamas_obstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob1v4mnob1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob1v8mnob1.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob1v15mnob1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob1v30mnob1.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-2) }
+\label{fig:bahamas_comp_obstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnnoobv4mnnoob.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnnoobv8mnnoob.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnnoobv15mnnoob.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnnoobv30mnnoob.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test NO-OB) }
+\label{fig:bahamas_comp_noobstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob0v4mnob0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob0v8mnob0.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob0v15mnob0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnob0v30mnob0.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-0) }
+\label{fig:bahamas_comp_obstr0}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnobrv4mnobr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnobrv8mnobr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnobrv15mnobr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/bahamas/gs_runs4/ATLBAHcomp_2mnobrv30mnobr.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-1) }
+\label{fig:bahamas_comp_obstrr}
+\end{myfig}
+
+The two remaining methods of building obstruction grids (Tests OB-0 and OB-1) are compared in Figs~\ref{fig:bahamas_comp_obstr0} and~\ref{fig:bahamas_comp_obstrr} respectively. Overall we find that maximum blocking of swell energy occurs for Test OB-2 and the least for Test OB-0.  This is as we would expect, thus increasing our confidence in the algorithm. The differences in swell propagation behind the Lesser Antilles islands for the 30' grid are worth noting. Behind the Bahamas where most of the island chains are represented by obstructions (Fig~\ref{fig:bahamas_grid}) Test OB-0 under suppresses the wave energy leading to larger wave heights at Cuba. The same is true for the wave height distribution behind some of the island chains of the Lesser Antilles. On the other hand Test OB-O does a better job in the region behind the Dominican Republic ($15 \degree N$ and $70 \degree W$). This is because the coarser representation of the channels is compensated by the under suppression of wave energy in Test OB-0. We shall look at another example of this in greater detail for the Hawaii test case in the next section. In general however, the results show that though there are some differences between the three approaches, these are fairly minimal and within 10 - 15 \% (larger differences are fairly localized around the islands).  
+ 
+%\setcounter{subfigure}{0}
+%\begin{myfig}{tbp}
+%\subfigure[{\it Obstruction accounted for in cells on both sides}]{\psfig{file=images/bahamas/gs_runs3/ATLBAH_8min_obstr1.eps,angle=0,width=7.5cm}}
+%\subfigure[{\it Obstruction accounted for in cells on right (above) side for $x$ ($y$) directions}]{\psfig{file=images/bahamas/gs_runs3/ATLBAH_8min_obstrr.eps,angle=0,width=7.5cm}}\\
+%\begin{center}
+%\subfigure[{\it Difference between the two (a - b)}]{\psfig{file=images/bahamas/gs_runs3/ATLBAHcomp_8mnob1v8mnobr.eps,angle=0,width=7.5cm}}
+%\end{center}
+%\myfcapc{Obstruction comparisons for 8' grid}
+%\label{fig:bahamas_8min_obstr}
+%\end{myfig}
+
+\subsection{Hawaii}    
+
+The second test case is the region around the Hawaiian islands in the Pacific Ocean. The water around these islands is deep, so obstruction of swell propagation due to the islands is the main physical process. The islands are well represented at the higher resolution grids, while at the lower resolutions they can only be accounted for as obstructions (see Fig~\ref{fig:hawaii_grids}). At the 2' resolution all the main islands are well resolved. As a result there are no significant differences between the swell propagation runs with and without obstruction (see Fig~\ref{fig:hawaii_2min}\footnote{Classical patterns of GSE can be seen in the SW region of the grid for this test case because of the larger region of swell propagation behind the islands. The GSE patterns however are too small to make any significant impact on the results}). At the 4' resolution the main islands are fairly well represented (though the smaller chain of islands around $157\degree W$ and $21\degree N$ $-$ Islands of Molokai, Lanai and Kahoolawe $-$ are starting to lose their structure). At the 15' resolution only the Island of Hawaii (southernmost island also referred to as Big Island) is reasonably resolved and at the 30' resolution even that is not properly resolved.  
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it GSHHS polygons}]{\psfig{file=images/Hawaii_basecont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 2' grid}]{\psfig{file=images/Hawaii_2mincont.eps,angle=0,width=7.25cm}}\\
+\subfigure[{\it 4' grid}]{\psfig{file=images/Hawaii_4mincont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/Hawaii_8mincont.eps,angle=0,width=7.25cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/Hawaii_15mincont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/Hawaii_30mincont.eps,angle=0,width=7.25cm}}
+\myfcapc{Land masks for the Hawaii test case}
+\label{fig:hawaii_grids}
+\end{myfig}
+ 
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it Test NO-OB}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_2min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it Test OB-2}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_2min_obstr1.eps,angle=0,width=7.5cm}}\\
+\begin{center}
+\subfigure[{\it Difference between the two (with obstruction - no obstruction)}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob1v2mnnoob.eps,angle=0,width=7.5cm}}
+\end{center}
+\myfcapc{Normalized Significant wave heights for 2' grid}
+\label{fig:hawaii_2min}
+\end{myfig}
+
+In the absence of any obstruction (Fig~\ref{fig:hawaii_noobstr}) we can see that the blocking effects around the islands of Maui and Molokai, Oahu (further north) and Kauai (northern most island) are significantly reduced in the 15' grid and absent in the 30' grid. Including the obstruction grids reproduces the blocking effects (Fig~\ref{fig:hawaii_obstr1}). 
+ 
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_4min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_8min_noobstr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_15min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/hawaii/gs_runs3/PACHAW_30min_noobstr.eps,angle=0,width=7.5cm}}
+\myfcapc{Normalized Significant wave heights for Test NO-OB}
+\label{fig:hawaii_noobstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_4min_obstr1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_8min_obstr1.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_15min_obstr1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_30min_obstr1.eps,angle=0,width=7.5cm}}
+\myfcapc{Normalized Significant wave heights for Test OB-2}
+\label{fig:hawaii_obstr1}
+\end{myfig}
+
+Just like in the Caribbean region test case the obstruction grids reproduce the energy suppression behind the islands. Figs~\ref{fig:hawaii_comp_noobst} to~\ref{fig:hawaii_comp_obst1} compare the lower resolution grids with the ground truth, using different ways of accounting for obstructions. Once again we note that the three different ways of accounting for obstructions in neighboring cells leads to some differences in wave height patterns behind the islands. However, these differences are far less than what occur when obstructions are not taken into account at all. 
+
+Unlike the Caribbean test case we find that the best results are obtained here when obstructions are only accounted for in the individual cells (Fig~\ref{fig:hawaii_comp_obst0}). This is primarily because the main Hawaiian islands are not made up of a large number of smaller islands where the obstruction in the neighboring cells become important. Once again the biggest differences are in the coarsest resolution grids which are unable to represent channels. Fig~\ref{fig:hawaii_zoom} shows swell propagation through the Alenuihaha Channel (gap between the two southernmost islands of Hawaii $-$ Big Island and Maui) for the 2' and 30' grids. In this case, the poor representation of the channel in the coarser grid is compensated for by the lesser obstruction of swell energy in Test OB-0 leading to a better representation of wave heights behind the islands. 
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnnoobv4mnnoob.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnnoobv8mnnoob.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnnoobv15mnnoob.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnnoobv30mnnoob.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test NO-OB) }
+\label{fig:hawaii_comp_noobst}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob0v4mnob0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob0v8mnob0.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob0v15mnob0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob0v30mnob0.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-0) }
+\label{fig:hawaii_comp_obst0}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnobrv4mnobr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnobrv8mnobr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnobrv15mnobr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnobrv30mnobr.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-1) }
+\label{fig:hawaii_comp_obstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob1v4mnob1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob1v8mnob1.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob1v15mnob1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAWcomp_2mnob1v30mnob1.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-2) }
+\label{fig:hawaii_comp_obst1}
+\end{myfig}
+
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 2' grid}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_2minzoom_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid $-$ Test NO-OB}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_30minzoom_noobstr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 30' grid $-$ Test OB-0}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_30minzoom_obst0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid $-$ Test OB-1}]{\psfig{file=images/hawaii/gs_runs4/PACHAW_30minzoom_obstr.eps,angle=0,width=7.5cm}}
+\myfcap{Swell propagation through the Alenuihaha Channel (gap between the Island of Hawaii and Maui)}
+\label{fig:hawaii_zoom}
+\end{myfig}
+
+
+\subsection{French Polynesian Islands}
+
+The French Polynesian island chains of Marquesas and Tuamotu in the South Pacific (North East of Australia) make up the third and final test case for the grid generation algorithm. The individual islands are mostly atolls that are not well resolved even in the highest resolution grids (Fig~\ref{fig:frenchpoly_grids}) but still prove to be very effective in blocking swells. Fig~\ref{fig:frenchpoly_grids} shows that both the Marquesas (in the North-Eastern part of the grid) and the Tuamotu Archipelago (in the South-Western part of the grid) are poorly resolved at the 4' and 8' resolutions, and not resolved at all in the lower resolutions. Since most of the swell blocking occurs via obstructions this test case provides us with an ideal benchmark to test the obstruction grid algorithm.
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it GSHHS polygons}]{\psfig{file=images/FrenchPoly_basecont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 2' grid}]{\psfig{file=images/FrenchPoly_2mincont.eps,angle=0,width=7.25cm}}\\
+\subfigure[{\it 4' grid}]{\psfig{file=images/FrenchPoly_4mincont.eps,angle=0,width=7.25cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/FrenchPoly_8mincont.eps,angle=0,width=7.25cm}}\\
+%\subfigure[{\it 15' grid}]{\psfig{file=images/Hawaii_15mincont.eps,angle=0,width=7.25cm}}
+%\subfigure[{\it 30' grid}]{\psfig{file=images/Hawaii_30mincont.eps,angle=0,width=7.25cm}}
+\myfcapc{Land masks for the French Polynesian Islands test case}
+\label{fig:frenchpoly_grids}
+\end{myfig}
+ 
+Since the islands are spread over a large area this is an ideal place to test what is the impact of accounting for neighboring cell boundary information in the obstruction grids. Fig~\ref{fig:frenchpoly_2min_obs} shows the swell propagation at the highest resolution grid. At this resolution, obstruction grids have some impact on swells propagating through the Tuamotu archipelago as some of the atolls here can only be represented as obstructions.
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it Test NO-OB}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_2min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it Test OB-2}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_2min_obstr1.eps,angle=0,width=7.5cm}}\\
+\begin{center}
+\subfigure[{\it Difference (with obstruction - without obstruction)}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob1v2mnnoob.eps,angle=0,width=7.5cm}}
+\end{center}
+\myfcapc{Swell propagation through the 2' grid}
+\label{fig:frenchpoly_2min_obs}
+\end{myfig}
+
+With decreasing grid resolution obstructions become more important (Figs~\ref{fig:frenchpoly_noobstr} and~\ref{fig:frenchpoly_obstr1}). The blocking effect of the Tuamotu archipelago cannot be represented even at the 4' grid resolution, and at the 15' or lower resolution the blocking effect of both Marquesas and Tuamotu cannot be represented at all. This test case highlights the importance of having obstruction grids and using {\bf GSHHS} polygons to define the islands. Together the small island chains provide an effective barrier to ocean swells, the effects of which are well reproduced in the obstruction grid algorithms.    
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_4min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_8min_noobstr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_15min_noobstr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_30min_noobstr.eps,angle=0,width=7.5cm}}
+\myfcapc{Normalized Significant wave heights for Test NO-OB}
+\label{fig:frenchpoly_noobstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_4min_obstr1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_8min_obstr1.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_15min_obstr1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPY_30min_obstr1.eps,angle=0,width=7.5cm}}
+\myfcapc{Normalized Significant wave heights with obstruction for Test OB-2}
+\label{fig:frenchpoly_obstr1}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnnoobv4mnnoob.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnnoobv8mnnoob.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnnoobv15mnnoob.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnnoobv30mnnoob.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test NO-OB)}
+\label{fig:frenchpoly_comp_noobst}
+\end{myfig}
+
+Detailed comparison between the different ways of generating obstruction grids can be seen in the difference plots in Figs~\ref{fig:frenchpoly_comp_noobst} to~\ref{fig:frenchpoly_comp_obst1}. As expected, having an obstruction grid is more important than the details of the obstruction grid. Since this test case consists of a series of overlapping island chains which work collectively to obstruct the swells accounting for neighboring cell information will be more important here. This can be seen in the weaker blocking of swells through the Tuamotu archipelago in Test OB-0 (Fig~\ref{fig:frenchpoly_comp_obst0}). Taking into account the obstruction information of neighboring cells (Figs~\ref{fig:frenchpoly_comp_obstr} and~\ref{fig:frenchpoly_comp_obst1}) does a better job in reproducing the energy propagation patterns of the highest resolution run. Though we can see signs of over obstruction when we take into account all the neighbors instead of being selective, particularly at the lower resolution grids. Nonetheless, the impact of taking into account neighbors (as opposed to no neighbors) in the obstruction calculations is greater than how the neighbors are chosen. For this reason we will prefer the methodology of using both neighbors in building obstruction grids as it precludes the need for knowing the direction of swell propagation when applying the obstruction grids. 
+
+The algorithms were modified to work with curvilinear grids. To confirm that these algorithms work with curvilinear grids a quarter annullus curvilinear grid was generated over the domain using the following formulation 
+\begin{verbatim}
+dtheta = 0.75;
+dR = 0.25;
+Rmx = 30;
+X0 = 195;
+Y0 = -30.0;
+
+theta = [0:dtheta:90.0];
+R = 5+[0:dR:Rmx];
+
+Nth = length(theta);
+NR = length(R);
+
+for k = 1:Nth
+    for j = 1:NR
+        lon(k,j) = X0+R(j)*cosd(theta(k));
+        lat(k,j) = Y0+R(j)*sind(theta(k));
+    end;
+end;
+\end{verbatim}
+Figure~\ref{fig:frenchpoly_obscurv} shows the propagation of the swell field over the curvilniear grid. Propagation over a 1/4 deg rectlinear grid is also provided for reference. 
+ 
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob0v4mnob0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob0v8mnob0.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob0v15mnob0.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob0v30mnob0.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-0) }
+\label{fig:frenchpoly_comp_obst0}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnobrv4mnobr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnobrv8mnobr.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnobrv15mnobr.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnobrv30mnobr.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-1)}
+\label{fig:frenchpoly_comp_obstr}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it 4' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob1v4mnob1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 8' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob1v8mnob1.eps,angle=0,width=7.5cm}}\\
+\subfigure[{\it 15' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob1v15mnob1.eps,angle=0,width=7.5cm}}
+\subfigure[{\it 30' grid}]{\psfig{file=images/french_poly/gs_runs4/PACFPYcomp_2mnob1v30mnob1.eps,angle=0,width=7.5cm}}
+\myfcapc{Differences between 2' and lower resolution grids (Test OB-2) }
+\label{fig:frenchpoly_comp_obst1}
+\end{myfig}
+
+\setcounter{subfigure}{0}
+\begin{myfig}{tbp}
+\subfigure[{\it Rectlinear grid}]{\psfig{file=images/french_poly/frenchpoly_obsrect.eps,angle=0,width=7.5cm}}
+\subfigure[{\it Curvilinear grid}]{\psfig{file=images/french_poly/frenchpoly_obscurv.eps,angle=0,width=7.5cm}}
+\myfcap{Swell propagation using a 1/4 deg rectlinear grid and a quarter annullus curvilinear grid. In both grids obstructions were generated considering neighboring cell information at both ends}
+\label{fig:frenchpoly_obscurv}
+\end{myfig} 
+
+%\bpage
+\pb
+%--------------------------------------------------------------%
+% Section : Conclusions                                        %
+%--------------------------------------------------------------%
+\section{Conclusions} \label{sc:concl}
+\newsec
+
+A grid generation package for use with the WAVEWATCH III wave model has been developed in the MATLAB environment. To allow for as much flexibility as possible the package has been developed as a series of functions that can be called from a master script. This provides the users with the option to customize the package to their own needs, using only the parts that are desired. 
+
+The grid generation package consists of 5 main modules $-$ a grid generation module, a boundary module, a land mask module, a wet cell module and a sub - grid module $-$ at the end of which the package provides us with the grid (latitudes, longitudes and depth), land mask and obstruction (along $x$ and $y$ directions at the grid points) information that along with swell parameters and nest information (if applicable) make up the input for WAVEWATCH III simulations. Apart from these there is an additional module for modifying masks. This module is only applicable for the multi-grid version of WAVEWATCH III (version 3.10 or higher) and is needed for grids which get information from over-lapping grids. 
+
+The motivation for this work was two fold $-$ first to develop a methodology to accurately account for sub-grid obstructions, and second, to automate the process of grid generation from start to finish (including providing options for masking out unnecessary water bodies). The package uses global high resolution grid as the reference bathymetric data (choice is between NGDC's {\bf ETOPO2} and {\bf ETOPO1} databases) to build the grids and the Global Self - Consistent Hierarchical High Resolution Shoreline {\bf GSHHS} polygons to build the land-sea masks and obstruction data sets. 
+  
+The obstruction algorithm developed here has been tested at three different locations (Caribbean, Hawaii and the French Polynesian islands) with grids of several different resolutions. The obstruction algorithm allows for 3 different options $-$ account for obstructions in individual cells alone, account for obstructions in both neighboring cells and finally, account for obstructions only in the cell in the path of the propagating cells. All 3 options were compared with the highest resolution runs. 
+
+Overall the patterns of swell propagation at lower resolutions (where significant portions of the coastal features have to be modeled as sub-grid obstructions) compare well with the swell propagation patterns at higher resolution when obstruction grids are taken into account. Accounting for obstructions improved the solution by more than 50 \% in comparison to not accounting for obstruction. There were small differences in the results depending upon how the neighboring cell information was handled. In regions with a number of small island chains and atolls (Tuamotu archipelago in the South Pacific and the Bahamas in the Caribbean) accounting for obstruction in the neighboring cells lead to better estimates of the blocking effect. In flows through the channels between large islands not accounting for neighboring cell information works a little better because the under blocking of swells is compensated by the coarser resolution of the channels. For developing practical forecasts suppression of true swell penetration is more desirable than spurious swell penetration, making OB-2 the preferable option for building obstruction grids. In general though, these differences in wave heights from the three different obstruction options is minimal (10-15 \%) in comparison to not accounting for obstruction. Hence underscoring the importance of having a robust obstruction algorithm for practical applications.    
+
+The earlier versions of this grid generation package was developed strictly for rectilniear grids. But v 4.18 of the WAVEWATCH III code allows for unstructured and curvilinear grids as well. So v 2 of the grid generation package was developed to allow for developing bathymetric and obstruction grids for curvilinear grids as well. Validation studies were carried out over the French Polynesian island chain. It should be noted that while this package will do all the operations for the curvilnear grids that it does for the rectilinear grids (determine the bathymetry, check for cells inside boundaries, clean up water bodies, develop obstructions etc.) it will not actually generate the coordinates of the curvilinear grids. Users are expected to use external software to develop these. 
+
+%\bpage
+\pb
+%--------------------------------------------------------------%
+%           References                                         %
+%--------------------------------------------------------------%
+\addtocontents{toc}{\vspace
+{\baselineskip}}
+\addcontentsline{toc}{subsection}{References}
+\setcounter{footnote}{0}
+
+\bibliographystyle{jas}
+%\bibliography{short,articles,books,reports,conf,mine}
+\bibliography{grid_generation}
+%\pb
+%\pagestyle{empty}
+%\bpagea
+
+\pb \strut
+%\pagestyle{empty}
+
+
+\vspace{2.5in} \centerline{\large \bf APPENDICES}
+\appendix
+
+\bpage
+\pb \newsec \setcounter{page}{1} \pagestyle{\pstyle}
+\renewcommand{\thepage}{\thesection.\arabic{page}}
+%--------------------------------------------------------------%
+% Appendix: ....                                               %
+%--------------------------------------------------------------%
+\section{Grid Generation module}
+This function creates a 2D bathymetry data set from high resolution bathymetry sets. Global high resolution {\bf ETOPO2} and {\bf ETOPO1} bathymetry sets are provided with this software. All reference bathymetry data sets are assumed to be stored in Netcdf formats. 
+
+\begin{verbatim}
+% -------------------------------------------------------------------------
+%| depth = generate_grid(x,y,ref_dir,bathy_source,limit,cut_off,dry,[var])|
+%|                                                                        |
+%| INPUT                                                                  |
+%|  x            : A 2D array specifying the longitudes of each cell      | 
+%|  y            : A 2D array specifying the lattitudes of each cell      |
+%|  ref_dir      : PATH string to where the global reference bathymetry   |
+%|                    data sets are stored                                |
+%|  bathy_source : String file to indicate which type of bathymetry is    |
+%|                 being used. User needs to make sure that the bathymetry|
+%|                 data files corresponding to the options are available  |
+%|                 in ref_dir                                             |
+%|                 Options are --                                         |
+%|                     'etopo1' -- ETOPO1 bathymetry (etopo1.nc)          |
+%|                     'etopo2' -- ETOPO2 bathymetry (etopo2.nc)          |
+%|  limit        : Value ranging between 0 and 1 indicating what fraction |
+%|                 of a grid cell needs to be covered by wet cells (from  |
+%|                 the base grid) for the cell to be marked wet           | 
+%|  cut_off      : Cut_off depth to distinguish between dry and wet cells.|
+%|                 All depths below the cut_off depth are marked wet      | 
+%|  dry          : Depth value assigned to the dry cells                  |
+%|  var          : These are optional string arrrays for variable         |
+%|                 definition names for lon (x), lat (y) and depth        |
+%|                 respectively. If ommitted default names are used.      | 
+%|                   For the etopo2.nc file these are 'x',   'y'   and 'z'|
+%|                   For the etopo1.nc file these are 'lon', 'lat' and 'z'|
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  depth        : A 2D array of dimensions (Nx,Ny) consisting of the grid|
+%|                 depths                                                 |
+% -------------------------------------------------------------------------
+\end{verbatim} 
+
+\bpagea
+\pb
+\section{Boundary module}
+Computes the shoreline polygons from the GSHHS database that lie within the grid domain, properly accounting for polygons that cross the domain. The default option is to work with coastal polygons but that can be reset by using different flags. See GSHHS documentation (or below) for the meaning of the different flags.
+\begin{verbatim}
+% -------------------------------------------------------------------------
+%| [bound_ingrid,Nb] = compute_boundary(coord,bound,[bflg])               |
+%|                                                                        |
+%| INPUT                                                                  |
+%|   coord : An array defining the corner points of the grid              |
+%|           coord(1) = Lattitude (y) of lower left hand corner           |
+%|           coord(2) = Longitude (x) of lower left hand corner           |
+%|           coord(3) = Lattitude (y) of upper right hand corner          |
+%|           coord(4) = Longitude (x) of upper right hand corner          |
+%|   bound : A data structure array of the basic polygons (The GSHHS      |
+%|           polygons are stored as mat files with several different      | 
+%|           resolutions and the user should ensure that the files have   |
+%|           been loaded before using this routine).                      |
+%|                                                                        |
+%|           The different available files are --                         |
+%|             coastal_bound_ful.mat    -- Full resolution                |
+%|                                         (188606 polygons)              |
+%|                     coastal_bound_high.mat   -- High resolution        |
+%|                                         (0.2 km; 153539 polygons)      |
+%|                     coastal_bound_inter.mat  -- Intermediate resolution|
+%|                                         (1 km; 41523 polygons)         |
+%|                     coastal_bound_low.mat    -- Low resolution         |
+%|                                         (5 km; 10769 polygons)         |
+%|                     coastal_bound_coarse.mat -- Coarse resolution      |
+%|                                         (25 km; 1866 polygons)         |
+%|                                                                        |
+%|    bflg : Optional definition of flag type from the gshhs boundary     |
+%|           database (1 = land; 2 = lake margin; 3 = in-lake island).    |
+%|           If left blank, defaults to land (1).                         |
+%|                                                                        |
+%|          Alternatively, a separate list of user defined polygons can   |
+%|          be generated having the same fields as bound. One such list is|
+%|          "optional_coastal_polygons.mat" which is also distributed with|
+%|          reference data. This is an ever growing list of water bodies  |
+%|          that see very little wave action and for most practical       | 
+%|          purposes can be masked out as land.                           |
+%|                                                                        | 
+%|          See also optional_bound.m which shows how the optional coastal|
+%|          polygons are used                                             |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  bound_ingrid : Subset data structure array of polygons that lie inside|
+%|                 the grid                                               |
+%|  Nb           : Total number of polygons found that lie inside the grid|
+%|                                                                        |
+% -------------------------------------------------------------------------
+\end{verbatim} 
+
+\bpagea
+\pb
+\section{Land mask module}
+This function checks all the wet cells in a 2D mask array and determines if they lie outside the boundary polygons or not. 
+\begin{verbatim}
+% -------------------------------------------------------------------------
+%| mask = clean_mask(x,y,mask,bound_ingrid,lim,offset)                    |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  x            : A 2D array specifying the longitudes of each cell      |
+%|  y            : A 2D array specifying the longitudes of each cell      |
+%|  mask         : A 2D mask array of size (Nx,Ny) of initial mask values |
+%|                 with wet cells having a flag of 1 and dry cells a flag |
+%|                 value of 0. The initial mask can be all set to 1 or for|
+%|                 better efficiency be based on the bathymetry data      |
+%|  bound_ingrid : Data structure array of boundary polygons that lie     |
+%|                 inside the grid                                        |
+%|  lim          : Fraction value between 0 and 1 that define the cut-off |
+%|                 limit for the proportion of a cell that has to lie     | 
+%|                 inside boundary polygons for the cell to be marked dry |
+%|  offset       : An additional width around the boundaries to check if  |
+%|                 wet cells are being crossed by the boundary. Typically |
+%|                 set it to largest grid resolution                      |
+%|                                                                        |
+%|  OUTPUT                                                                |
+%|    mask       : New land/sea mask array that is generated after        |
+%|                 checking with the boundary polygons                    |
+%|                                                                        |
+% -------------------------------------------------------------------------
+\end{verbatim}
+\subsection{A boundary splitting module}
+The module for cleaning masks is the slowest part of the code. Primarily because checking cells in very large boundary polygons is very time consuming. An alternative algorithm for splitting boundaries is provided.
+\begin{verbatim}
+% -------------------------------------------------------------------------
+%| bound_ingrid = split_boundary(bound,lim,[bflg])                        |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  bound : Data structure array of boundary polygons that lie inside the |
+%|          grid domain                                                   |
+%|  lim   : Limiting size to determine if a polygon needs to be split     |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%| bound_ingrid : A new data structure of boundary polygons where the     |
+%|                larger polygons have been split up to more managable    |
+%|                smaller sizes                                           |
+%|                                                                        |
+% -------------------------------------------------------------------------
+\end{verbatim}
+
+\bpagea
+\pb
+\section{Wet cell module}
+This routine groups wet cells into independant water bodies with all the wet cells connected to each other sharing the same unique ID
+\begin{verbatim}
+% -------------------------------------------------------------------------
+%|  [mask_mod,mask_map] = remove_lake(mask,lake_tol,igl)                  | 
+%|                                                                        |
+%| INPUT                                                                  |
+%|  mask     : Input 2D land/sea mask                                     |
+%|  lake_tol : Tolerance value that determines all the wet cells          | 
+%|             corresponding to a particular wet body should be flagged   | 
+%|             dry or not. If the value is a +ve number then all water    | 
+%|             bodies having less than this value of total wet cells will |
+%|             be flagged dry. If the value is 0 then the output and input|
+%|             masks are unchanged. If the value is -ve then all but the  |
+%|             largest water body is flagged dry                          |
+%|  igl      : Switch to determine if the grid is global or regional. This| 
+%|             is needed to determine if the first and last cells along a | 
+%|             particular row (longitude/x) are connected or not.         |
+%|             Options are --                                             |
+%|                igl = 0 for regional (not connected) grids              |
+%|                igl = 1 for global (connected) grids                    |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  mask_mod : Modified 2D land/sea mask based on the value of lake_tol   |
+%|  mask_map : 2D array that has a value of -1 for all land (dry) cells   |
+%|             and unique IDs for wet cells that are part of a water body.|
+%|                                                                        |
+% -------------------------------------------------------------------------
+\end{verbatim}
+
+\bpagea
+\section{Obstruction module}
+This routine generates the 2D obstruction grid in x and y given a 2D mask and set of boundary polygons. Obstructions are only generated for wet cells and obstructions for cells on either side of a dry cell are also set to 0 (to prevent spurious suppression of swell near the coast). The routine allows for the possibility of curvilinear coordinates and locally rotates the grid to align the coordinates in lat/lon space with local p/q space which is determined by the 2D x and y matrices. 
+\begin{verbatim}
+% -------------------------------------------------------------------------
+%| [sx,sy] = create_obstr_curv(x,y,bound,mask,coords,offset_left,...      |
+%|                                                   offset_right)        |
+%|                                                                        |
+%| INPUT                                                                  |
+%|  x            : A 2D array specifying the longitudes of each cell      | 
+%|  y            : A 2D array specifying the lattitudes of each cell      | 
+%|  bound        : Data structure array of boundary polygons              |
+%|  mask         : 2D array of size (Nx,Ny) that determines land/sea mask |
+%|  offset_left  : Flag to determine if neighbor to the left/down in x/y  |
+%|                 should be considered. (0/1 = no/yes)                   |
+%|  offset_right : Similar for neighbor to the right/up in x/y            |
+%|                                                                        |
+%| OUTPUT                                                                 |
+%|  sx,sy        : 2D obstruction grids of size (Nx,Ny) for obstructions  |
+%|                 in x and y. Values range from 0 for no obstruction to 1| 
+%|                 for full obstruction                                   | 
+%|                                                                        |
+% -------------------------------------------------------------------------
+\end{verbatim} 
+
+\end{document} 

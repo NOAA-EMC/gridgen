@@ -224,7 +224,7 @@ end;  %@@@ End of while new_mask loop.
 mask_mod = mask;
 
 if (lake_tol < 0)                    
-    [N_max,pos] = max(N1);
+    [~,pos] = max(N1);
     for i = 1:last_mask
         if (i ~= pos)
             loc = mask_map == i;

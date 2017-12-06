@@ -1,4 +1,4 @@
-function [bound_ingrid,Nb] = compute_boundary(coord,bound)
+function [bound_ingrid,Nb] = compute_boundary(coord,bound,varargin)
 
 % -------------------------------------------------------------------------
 %|                                                                        |
@@ -15,11 +15,11 @@ function [bound_ingrid,Nb] = compute_boundary(coord,bound)
 %| DESCRIPTION                                                            |
 %| Computes the shoreline polygons from the GSHHS database that lie within| 
 %| the grid domain, properly accounting for polygons that cross the domain| 
-%| The routine has been designed to work with coastal polygons only but   |
-%| that can be changed by changing the flag bound(i).flag in the code. See|
-%| GSHHS documentation for the meaning of the different flags             |
+%| The routine has been designed to work with coastal polygons by default.|
+%| That can be changed by using a different boundary flag. See GSHHS      |
+%| documentation (or below) for the meaning of the different flags        |
 %|                                                                        |
-%| [bound_ingrid,Nb] = compute_boundary(coord,bound)                      |
+%| [bound_ingrid,Nb] = compute_boundary(coord,bound,[bflg])               |
 %|                                                                        |
 %| INPUT                                                                  |
 %|   coord : An array defining the corner points of the grid              |
@@ -44,6 +44,10 @@ function [bound_ingrid,Nb] = compute_boundary(coord,bound)
 %|		       coastal_bound_coarse.mat -- Coarse resolution      |
 %|                                         (25 km; 1866 polygons)         |
 %|                                                                        |
+%|    bflg : Optional definition of flag type from the gshhs boundary     |
+%|           database (1 = land; 2 = lake margin; 3 = in-lake island).    |
+%|           If left blank, defaults to land (1).                         |
+%|                                                                        |
 %|	    Alternatively, a separate list of user defined polygons can   |
 %|          be generated having the same fields as bound. One such list is|
 %|	    "optional_coastal_polygons.mat" which is also distributed with|
@@ -60,6 +64,17 @@ function [bound_ingrid,Nb] = compute_boundary(coord,bound)
 %|  Nb           : Total number of polygons found that lie inside the grid|
 %|                                                                        |
 % -------------------------------------------------------------------------
+narg=nargin;
+
+% Determine if third input variable present (requesting inland features)
+if narg == 3
+  bflg = varargin{1}; % Highest level admitted to provide shoreline data
+elseif narg == 2
+  bflg = 1; % Normal application only continental bounds
+else
+  disp('Too many input arguments, exiting')
+  return;
+end  
 
 lat_start = coord(1);
 lon_start = coord(2);
@@ -109,8 +124,6 @@ N = length(bound);
 in_coord = 1;
 itmp = 0;
 
-
-
 %@@@ Loop through all the boundaries in the database
 
 for i = 1:N
@@ -119,7 +132,7 @@ for i = 1:N
     %@@@ changed if interested in other boundaries. See GSHHS documentation 
     %@@@ for boundary type flags
    
-    if (bound(i).level == 1)
+    if (bound(i).level == bflg )
                                                      
         %@@@ Determine if boundary lies completely outside the domain
         
@@ -129,6 +142,8 @@ for i = 1:N
         else
             in_grid = 1;
         end;
+
+        lev1 = bound(i).level;
 
         %@@@ Determine if boundary lies completely inside the domain
 
@@ -191,7 +206,7 @@ for i = 1:N
                         bound_ingrid(in_coord).south = lat_start;
                         bound_ingrid(in_coord).height = lon_end - lon_start;
                         bound_ingrid(in_coord).width = lat_end - lat_start;
-                        bound_ingrid(in_coord).level = 1;
+                        bound_ingrid(in_coord).level = lev1;
                         in_coord = in_coord + 1;
                     end;
                     clear loc_t domain_inb;
@@ -729,7 +744,7 @@ for i = 1:N
                                             - bound_ingrid(in_coord).south;
                             bound_ingrid(in_coord).width = bound_ingrid(in_coord).east ...
                                             - bound_ingrid(in_coord).west;
-                            bound_ingrid(in_coord).level = 1;
+                            bound_ingrid(in_coord).level = lev1;
                                                        
                             in_coord=in_coord+1;    %@@@ increment boundary 
                                                     %@@@ counter                                                                       
@@ -749,7 +764,6 @@ for i = 1:N
             else                     %@@@ boundary lies completely inside the grid
 
                 %@@@ initializing and adding the boundary to the list
-
                 bound_ingrid(in_coord).x = [];
                 bound_ingrid(in_coord).y = [];
                 bound_ingrid(in_coord).n = 0;
@@ -770,7 +784,7 @@ for i = 1:N
                     - bound_ingrid(in_coord).south;
                 bound_ingrid(in_coord).width = bound_ingrid(in_coord).east ...
                     - bound_ingrid(in_coord).west;
-                bound_ingrid(in_coord).level = 1;
+                bound_ingrid(in_coord).level = lev1;
                 in_coord = in_coord+1;
 
             end;     %@@@ corresponds to if statement that determines if boundary 

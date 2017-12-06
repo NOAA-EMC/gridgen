@@ -15,16 +15,14 @@
  
   fname = 'Alaska_reg';                                  % file name prefix
   [lon,lat] = read_ww3meta([in_dir,'/',fname,'.meta']);  % read meta file
-  Nx = length(lon);
-  Ny = length(lat);
+  [Ny,Nx] = size(lon);
   m = read_mask([in_dir,'/',fname,'.maskorig_ascii'],Nx,Ny); % read mask file
 
 % 2. Read particulars from base grid (grid with which data has to be exchanged) 
 
   fnameb = 'Global';
   [lonb,latb] = read_ww3meta([in_dir,'/',fnameb,'.meta']);
-  Nxb = length(lonb);
-  Nyb = length(latb);
+  [Nyb,Nxb] = size(lonb);
   mb = read_mask([in_dir,'/',fnameb,'.maskorig_ascii'],Nxb,Nyb);
 
 
@@ -37,14 +35,14 @@
 
 % 4. Compute the new mask
 
-  m_new = modify_mask(m,lon,lat,px,py,mb,lonb,latb,1);   
+  m_new = modify_mask(m,lon,lat,mb,lonb,latb,1,px,py);   
 
 % 5. You can have multiple polygons if needed
 
   px1 = [178 184 184 178 178];
   py1 = [70.5 70.5 72 72 70.5];
 
-  m_tmp = modify_mask(m,lon,lat,px1,py1,mb,lonb,latb,1); % save the mask info 
+  m_tmp = modify_mask(m,lon,lat,mb,lonb,latb,1,px1,py1); % save the mask info 
                                                          % for every polygon in 
                                                          % a different variable
 

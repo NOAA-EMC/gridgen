@@ -83,9 +83,11 @@ for i = 1:N
         return;
     end;
     
-    if (mt(loc(i)) ~= mb(ipos,jpos))
-        mt(loc(i)) = 0;
-        mb(ipos,jpos) = 0;
+    if (mt(loc(i)) ~= mb(ipos,jpos) )
+        if (mt(loc(i)) ~=2 && mb(ipos,jpos) ~=2)
+           mt(loc(i)) = 0;
+           mb(ipos,jpos) = 0;
+        end;
     end;
 end;
 

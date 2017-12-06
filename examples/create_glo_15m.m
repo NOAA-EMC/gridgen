@@ -1,13 +1,14 @@
-% THIS IS AN EXAMPLE SCRIPT FOR GENERATING A REGIONAL GRID AND CAN BE USED 
-% AS  A TEMPLATE FOR DESIGNING GRIDS
+% Script to create the NCEP Global Wave Ensemble grid for v3.0.0 (Jan 2014)
 
 % 0. Initialization
 
 % 0.a Path to directories 
 
-  bin_dir = '/$HOME/gridgen/bin';             % matlab scripts location
-  ref_dir = '/$HOME/gridgen/reference_data';  % reference data location
-  out_dir = '/OUTPUT-PATH/';                  % output directory
+  bin_dir = '../bin';             % matlab scripts location
+  ref_dir = '../reference_data';  % reference data location
+  out_dir = './output'    % output directory
+  mkdir out_dir
+  dep_dir = ref_dir ;
 
 % 0.b Design grid parameters
 
@@ -19,9 +20,9 @@
                                      % ignores the polygon while 1 
                                      % accounts for the polygon.
 
-  fname = 'Alaska_reg';              % file name prefix 
+  fname = 'glo_15m';                  % file name prefix 
   
-  grid_box = [44 140 75 240];        % starting and ending lat,lon for grid 
+  grid_box = [-90 0 90 360];       % starting and ending lat,lon for grid 
                                      % domain. Longitude data is always
                                      % defined from 0 to 360
   dx = 15.0/60.0;                    % grid resolution in x (degrees)
@@ -53,7 +54,7 @@
                                   % cleared the boundary data will have to 
                                   % be read again)
 
-  opt_poly = 0;                   % flag for reading the optional user 
+  opt_poly = 1;                   % flag for reading the optional user 
                                   % defined polygons. Set to 0 if you do
                                   % not wish to use this option
 
@@ -65,7 +66,7 @@
       load([ref_dir,'/coastal_bound_',boundary,'.mat']); 
 
       N = length(bound);
-      Nu = 0;
+
       if (opt_poly == 1)
           [bound_user,Nu] = optional_bound(ref_dir,fname_poly);       
       end;                                              
@@ -77,30 +78,77 @@
 
 % 1. Generate the grid
 
-  fprintf(1,'.........Creating Bathymetry..................\n');  
+% Keep in mind that depending upon the available memory, you may not be  
+% able to load the Global Reference grid on your workspace all at once. In 
+% which case you will have to build the bathymetry data set in segments. 
+% Both options are given below. Uncomment the one you want to use
 
-  [lon,lat,depth] = generate_grid(ref_dir,ref_grid,grid_box,dx,dy,0.1,0,999);
-         
+  fprintf(1,'.........Creating Bathymetry..................\n');
+
+  y = grid_box(1):dy:grid_box(3);
+  x = grid_box(2):dx:grid_box(4);
+  [X,Y]=meshgrid(x,y);
+  lon=x;
+  lat=y;
+
+  depth = generate_grid(X,Y,dep_dir,ref_grid,.5,-1,0);
+
 % 2. Computing boundaries within the domain
 
   fprintf(1,'.........Computing Boundaries..................\n');
 
-% 2.a Set the domain big enough to include the cells along the edges of the grid
+% 2.a Split the domain into two parts to avoid polygons improperly 
+% wrapping around
 
-  lon_start = lon(1)-dx;
-  lon_end = lon(end)+dx;
-  lat_start = lat(1)-dy;
-  lat_end = lat(end)+dy;
+  grid_box1 = [-80 0 89.5 180.0];
+  grid_box2 = [-80 180.0 89.5 360];
+
 
 % 2.b Extract the boundaries from the GSHHS and the optional databases
 %     the subset of polygons within the grid domain are stored in b and b_opt
 %     for GSHHS and user defined polygons respectively
 
-  coord = [lat_start lon_start lat_end lon_end];
-  [b,N1] = compute_boundary(coord,bound);
-  if (opt_poly == 1)
-      [b_opt,N2] = compute_boundary(coord,bound_user);     
+  [ba,N1a] = compute_boundary(grid_box1,bound);
+  [bb,N1b] = compute_boundary(grid_box2,bound);
+  
+  N1 = 0;
+  if (N1a ~= 0)
+      b = ba;
+      N1 = N1a;
   end;
+  if (N1b > 0)
+      if (N1 == 0)
+          b = bb;
+          N1 = N1b;
+      else
+          b = [ba bb];
+          N1 = N1+N1b;
+      end;
+  end;
+
+  if (opt_poly == 1)
+      [ba_opt,N2a] = compute_boundary(grid_box1,bound_user);
+      [bb_opt,N2b] = compute_boundary(grid_box2,bound_user);
+
+      N2 = 0;
+      if (N2a > 0)
+          b_opt = ba_opt;
+          N2 = N2a;
+      end;
+      if (N2b > 0)
+          if (N2 == 0)
+              b_opt = bb_opt;
+              N2 = N2b;
+          else
+              b_opt = [ba_opt bb_opt];
+              N2 = N2+N2b;
+          end;
+      end;
+      clear ba_opt bb_opt;
+  end;
+
+  clear ba bb; 
+
 
 % 3. Set up Land - Sea Mask
 
@@ -119,7 +167,7 @@
 
   fprintf(1,'.........Splitting Boundaries..................\n');
 
-  b_split = split_boundary(b,2);
+  b_split = split_boundary(b,10);
 
 % 3.c Get a better estimate of the land sea mask using the polygon data sets.
 %     (NOTE : This part will have to be commented out if cells above the 
@@ -130,12 +178,12 @@
  % GSHHS Polygons. If 'split_boundary' routine is not used then replace
  % b_split with b  
  
-  m2 = clean_mask(lon,lat,m,b_split,0.5);
+  m2 = clean_mask(X,Y,m,b_split,0.5,0.5);
   
  % Masking out regions defined by optional polygons
  
   if (opt_poly == 1 && N2 ~= 0)
-      m3 = clean_mask(lon,lat,m2,b_opt,0.5);       
+      m3 = clean_mask(X,Y,m2,b_opt,0.5,0.5);       
   else                                              
       m3 = m2;
   end;
@@ -144,16 +192,25 @@
 
   fprintf(1,'.........Separating Water Bodies..................\n');
 
-  [m4,mask_map] = remove_lake(m3,-1,0); 
+  [m4,mask_map] = remove_lake(m3,-1,1); 
   
 % 4. Generate sub - grid obstruction sets in x and y direction, based on 
 %    the final land/sea mask and the coastal boundaries
     
   fprintf(1,'.........Creating Obstructions..................\n');
 
-  [sx1,sy1] = create_obstr(lon,lat,b,m4,1,1);      
+  [sx1,sy1] = create_obstr(X,Y,b,m4,1,1);      
   
 % 5. Output to ascii files for WAVEWATCH III
+%    For global grids the first and last points in longitude are same and 
+%    so the last x point is omitted
+
+  depth = depth(:,1:end-1);                                 
+  lon = lon(1:end-1);                                       
+  m4 = m4(:,1:end-1);                                       
+  mask_map = mask_map(:,1:end-1);
+  sx1 = sx1(:,1:end-1);
+  sy1 = sy1(:,1:end-1);
 
   depth_scale = 1000;
   obstr_scale = 100;

@@ -10,6 +10,15 @@ Documentation : Documentation is available at three levels. First, is the grid g
                 workspace by typing help <name>, where <name> is the subroutine. (NOTE: The
                 path to the subroutines should be set when trying this option).
 
+GIT users     : If you are a developer and/or acquired this package through NCEP's git repository,
+                you will need to download the binary files package gridgen.tgz. Large binary files
+                are not available in the GIT repository, and need to be added to your griden local
+                copy via downloading from:
+
+                ftp://polar.ncep.noaa.gov/tempor/ww3ftp/gridgen_addit.tgz
+
+                This will unpack the netcdf etopo1.nc and etopo.nc bathymetry files.
+
 Dependency    : Matlab and netcdf routines for matlab. 
                 Netcdf toolbox for Matlab can be obtained from (http://mexcdf.sourceforge.net/)
                 (NOTE: Netcdf toolbox is only used for reading the global bathymetry data files
@@ -44,6 +53,14 @@ Addendums     : 1. The generate_grid function now has two extra parameters that 
                    d) Generating grids only in the 0 - 360 lon range (this is the range in which the 
                       boundaries are defined, and switching to -180 - 180 range was leading to improper
                       treatment of boundary closure in certain cases.
-----------------------------------------------------------------------------------------------------------------
-Last updated  : 10/24/2012
-Bug reports   : arun.chawla@noaa.gov
+
+IMPORTANT     : Gridgen now does not require the grids to be rectilinear to allow for development support for
+                curvilinear grids. Thus lat / lon arrays are now 2 dimensional to allow for varying 
+                resololution. Gridgen will not make the arrays needed for the grids. There are 
+                number of softwares available for that, but given the grids will generate all other 
+                features -- bathymetry, masks and obstruction grids. See examples for how to generate the
+                2D grids for rectilinear (constant spacing lat/lon) domains 
+
+---------------------------------------------------------------------------------------------------------------
+Last updated  : 12/06/2017
+Bug reports   : henrique.alves@noaa.gov
