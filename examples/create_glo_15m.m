@@ -4,15 +4,15 @@
 
 % 0.a Path to directories 
 
-  bin_dir = '../bin';             % matlab scripts location
-  ref_dir = '../reference_data';  % reference data location
+  bin_dir = '../bin/';             % matlab scripts location
+  ref_dir = '../reference_data/';  % reference data location
   out_dir = './output'    % output directory
   mkdir out_dir
   dep_dir = ref_dir ;
 
 % 0.b Design grid parameters
 
-  fname_poly = 'user_polygons.flag'; % A file with switches for using user 
+  fname_poly = [ref_dir,'user_polygons.flag']; % File with switches for user 
                                      % defined polygons. An example file 
                                      % has been provided with the reference 
                                      % data for an existing user defined 

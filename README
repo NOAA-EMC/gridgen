@@ -13,11 +13,22 @@ Documentation : Documentation is available at three levels. First, is the grid g
 GIT users     : If you are a developer and/or acquired this package through NCEP's git repository,
                 you will need to download the binary files package gridgen.tgz. Large binary files
                 are not available in the GIT repository, and need to be added to your griden local
-                copy via downloading from:
+                copy reference_data directory. After you cd to reference_data, get the binaries
+                using:
 
-                ftp://polar.ncep.noaa.gov/tempor/ww3ftp/gridgen_addit.tgz
+                wget ftp://polar.ncep.noaa.gov/tempor/ww3ftp/gridgen_addit.tgz
 
-                This will unpack the netcdf etopo1.nc and etopo.nc bathymetry files.
+                This will unpack the netcdf batymetry files:
+                  - etopo1.nc 
+                  - etopo2.nc 
+                and matlab binary files:
+                  - coastal_bound_coarse.mat
+                  - coastal_bound_high.mat   
+                  - coastal_bound_low.mat
+                  - coastal_bound_full.mat    
+                  - coastal_bound_inter.mat  
+                  - optional_coastal_polygons.mat
+.
 
 Dependency    : Matlab and netcdf routines for matlab. 
                 Netcdf toolbox for Matlab can be obtained from (http://mexcdf.sourceforge.net/)
