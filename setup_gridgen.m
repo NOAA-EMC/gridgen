@@ -12,8 +12,8 @@ function setup_gridgen
 %|  National Oceanic and Atmospheric Administration.  All rights reserved.|
 %|                                                                        |
 %| DESCRIPTION                                                            |
-%| The setup_gridgen function suports the gridgen                         |
-%| 1. downloads the reference data (etopo1 and etopo2) from NCEP's server |
+%| The setup_gridgen function supports the gridgen                        |
+%| 1. downloads the reference data (etopo1 and etopo2) from NCEP's server,|
 %| 2. uncompresses the tarball at the appropriate path and                |
 %| 3. adds temporarily the grid_gen's paths to the MATLAB's pathdef.      |
 %|                                                                        |
@@ -44,13 +44,17 @@ path_exm='examples';                % examples path
 ftp_svr='polar.ncep.noaa.gov';      % ftp server of reference data
 ftp_pth='/tempor/ww3ftp';           % ftp path for reference data
 bathy_file='gridgen_addit.tgz';     % reference data tarball
-%% Downloading 
-ftp_ind=ftp(ftp_svr);
-cd(ftp_ind,ftp_pth);
-mget(ftp_ind,bathy_file);
-close(ftp_ind);
+%% Downloading
+if exist([home,'/',path_tar,'/etopo1.nc'], 'file') ~= 2
+    ftp_ind=ftp(ftp_svr);
+    cd(ftp_ind,ftp_pth);
+    mget(ftp_ind,bathy_file,home);
+    close(ftp_ind);
 %% Untar the reference data
-untar(bathy_file,path_tar)
+    untar([home,'/',bathy_file],path_tar);
+%
+    delete([home,'/',bathy_file]);
+end
 %% Add the bin, reference path and examples to the user's matlab path
 addpath(fullfile(home, path_bin))
 addpath(fullfile(home, path_tar));
