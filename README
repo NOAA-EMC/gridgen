@@ -4,7 +4,9 @@ package has been developed and tested on MATLAB v7 or higher.
 
 Documentation : Documentation is available at three levels. First, is the grid generation 
                 manual -- grid_generation.pdf -- that is included with the release of the 
-                software. The second, are the comments in the master scripts that explain
+                software (download the images from ftp to compile tex: 
+                wget ftp://polar.ncep.noaa.gov/tempor/ww3ftp/gridgen.images.tar.gz).
+                The second, are the comments in the master scripts that explain
                 what the individual parts of the code are doing. And finally, there are 
                 brief explainations in each subroutine that can be read from the MATLAB
                 workspace by typing help <name>, where <name> is the subroutine. (NOTE: The
