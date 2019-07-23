@@ -59,4 +59,13 @@ end
 addpath(fullfile(home, path_bin))
 addpath(fullfile(home, path_tar));
 addpath(fullfile(home, path_exm));
+
+%% Install NetCDF package for octave
+vers=ver;
+% interpreter='Matlab';
+% netcdf_install='false';
+for i1=1:1:length(vers)
+    if strcmpi (vers(i1).Name, 'Octave')
+        pkg install -forge netcdf
+    end
 end

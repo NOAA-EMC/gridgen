@@ -79,21 +79,14 @@
 %|                 boundaries near the edges)                             |
 %|    05/02/2013 : Modified the algorithm for curvilinear grids.          |
 %|                 (See Notes)							  |
-%|	01/27/2017 : Octave compatible                                      |
+%|	  01/27/2017 : Octave compatible                                      |
 %|    06/27/2017 : Modified for very fine grids, Deanna's update          |
 % -------------------------------------------------------------------------
 %@@@ Octave Friendly
-vers=ver;
 for i1=1:1:length(vers)
     if strcmpi (vers(i1).Name, 'Octave')
-        for i2=1:1:length(vers)
-            if strcmpi (vers(i2).Name, 'netcdf')
-                pkg load netcdf;
-                import_netcdf
-            else 
-                error('Octave version of gridgen requires the netcdf package! Try: pkg install -forge netcdf')
-            end
-        end
+        pkg load netcdf;
+        import_netcdf;
     end
 end
 

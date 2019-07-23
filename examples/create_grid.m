@@ -7,8 +7,12 @@
 
   bin_dir = '../bin/';             % matlab scripts location
   ref_dir = '../reference_data/';  % reference data location
-  out_dir = '/OUTPUT-PATH/';                  % output directory
-
+  out_dir = '../OUTPUT-PATH/';                  % output directory
+ 
+  if exist(out_dir,'dir')~=7
+      mkdir (out_dir)
+  end
+      
 % 0.b Design grid parameters
 
   fname_poly = [ref_dir,'user_polygons.flag']; % File with switches for user 
@@ -53,7 +57,7 @@
 
 % 0.c Setting the paths for subroutines
 
-  addpath(bin_dir,'-END');
+  addpath(bin_dir,'-end');
 
 % 0.d Reading Input data
 
