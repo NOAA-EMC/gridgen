@@ -83,6 +83,7 @@
 %|    06/27/2017 : Modified for very fine grids, Deanna's update          |
 % -------------------------------------------------------------------------
 %@@@ Octave Friendly
+vers=ver;
 for i1=1:1:length(vers)
     if strcmpi (vers(i1).Name, 'Octave')
         pkg load netcdf;
