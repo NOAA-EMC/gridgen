@@ -12,11 +12,20 @@ Documentation : Documentation is available at three levels. First, is the grid g
                 workspace by typing help <name>, where <name> is the subroutine. (NOTE: The
                 path to the subroutines should be set when trying this option).
 
-GIT users     : If you are a developer and/or acquired this package through NCEP's git repository,
-                you will need to download the binary files package gridgen.tgz. Large binary files
-                are not available in the GIT repository, and need to be added to your griden local
-                copy reference_data directory. After you cd to reference_data, get the binaries
-                using:
+Installation  : To install the gridgen to your local system, including all the required binary 
+                files, run on your Matlab console:
+                `cd gridgen`
+                `setup_gridgen`
+                
+                It will take some time, depending on your internet connection, but the gridgen will
+                be added to your local path and the binary files will be downloaded automatically.
+
+GIT users     : If for any reason you want to avoid the "Installation" steps above, follow the 
+                instructions below. If you are a developer and/or acquired this package through NCEP's 
+                git repository, you will need to download the binary files package gridgen.tgz. 
+                Large binary files are not available in the GIT repository, and need to be added to 
+                your griden local copy reference_data directory. After you cd to reference_data, get 
+                the binaries using:
 
                 wget ftp://polar.ncep.noaa.gov/tempor/ww3ftp/gridgen_addit.tgz
 
