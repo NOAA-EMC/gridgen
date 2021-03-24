@@ -84,8 +84,8 @@ IMPORTANT     : Gridgen now does not require the grids to be rectilinear to allo
                 2D grids for rectilinear (constant spacing lat/lon) domains 
 
 ---------------------------------------------------------------------------------------------------------------
-Last updated  : 12/06/2017
-Bug reports   : henrique.alves@noaa.gov
+Last updated  : 21/03/2021
+Bug reports   : ali.abdolali@noaa.gov
 
 ## Disclaimer
 
