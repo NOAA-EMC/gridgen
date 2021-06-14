@@ -326,18 +326,18 @@ for j = 1:Nx
             end;
             lat_next = lat_prev + 1;
     
-            dx1 = min(abs(x(k,j)-lon_base(lon_prev)),abs(x(k,j)-...
-                lon_base(lon_prev)-360*sign(x(k,j)-lon_base(lon_prev))));
-            dx2 = dx_base - dx1;
-            dy1 = y(k,j) - lat_base(lat_prev);
-            dy2 = dy_base - dy1;
+            dx1 = double(min(abs(x(k,j)-lon_base(lon_prev)),abs(x(k,j)-...
+                lon_base(lon_prev)-360*sign(x(k,j)-lon_base(lon_prev)))));
+            dx2 = double(dx_base - dx1);
+            dy1 = double(y(k,j) - lat_base(lat_prev));
+            dy2 = double(dy_base - dy1);
             
             %@@@ Four point interpolation
             
-            a11 = depth_base(lat_prev,lon_prev);
-            a12 = depth_base(lat_prev,lon_next);
-            a21 = depth_base(lat_next,lon_prev);
-            a22 = depth_base(lat_next,lon_next);
+            a11 = double(depth_base(lat_prev,lon_prev));
+            a12 = double(depth_base(lat_prev,lon_next));
+            a21 = double(depth_base(lat_next,lon_prev));
+            a22 = double(depth_base(lat_next,lon_next));
             depth_sub(k,j) = (a11*dy2*dx2 + a12*dy2*dx1 + a21*dy1*dx2 + ...
                 a22*dx1*dy1)/den;
             
