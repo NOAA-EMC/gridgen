@@ -27,7 +27,7 @@ GIT users     : If for any reason you want to avoid the "Installation" steps abo
                 your griden local copy reference_data directory. After you cd to reference_data, get 
                 the binaries using:
 
-                wget ftp://polar.ncep.noaa.gov/tempor/ww3ftp/gridgen_addit.tgz
+                wget ftp://polar.ncep.noaa.gov/waves/gridgen/gridgen_addit.tar.gz
 
                 This will unpack the netcdf batymetry files:
                   - etopo1.nc 
